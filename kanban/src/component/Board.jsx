@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext } from "react-beautiful-dnd";
+import { v4 as uuidv4 } from 'uuid'; 
+import ColumnComponent from "./Column";
 import "./styles.css";
 
 // inicializa columnas
@@ -8,68 +10,7 @@ const initColumns = () => {
 	if (savedColumns) {
 		return JSON.parse(savedColumns);
 	}
-	return [{ id: "todo", title: "TO DO", tasks: [{ id: "a", title: "Hello" }] }];
-};
-
-const guidGenerator = () => {
-	var S4 = function () {
-		return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-	};
-	return (
-		S4() +
-		S4() +
-		"-" +
-		S4() +
-		"-" +
-		S4() +
-		"-" +
-		S4() +
-		"-" +
-		S4() +
-		S4() +
-		S4()
-	);
-};
-
-const TaskComponent = ({ id, title, indexTask }) => {
-	return (
-			<Draggable draggableId={id} index={indexTask}>
-				{(provided) => (
-					<div
-						className="task"
-						{...provided.draggableProps}
-						{...provided.dragHandleProps}
-						ref={provided.innerRef}
-					>
-						{title}
-					</div>
-				)}
-			</Draggable>
-	);
-};
-
-const ColumnComponent = ({ id, title, tasks, indexCol }) => {
-  return (
-		<>
-			<div key={id} className="column">
-				<h2>{title}</h2>
-				<Droppable droppableId={indexCol} key={indexCol}>
-					{(provided) => (
-						<div
-							className="task-list"
-							ref={provided.innerRef}
-							{...provided.droppableProps}
-						>
-							{tasks && tasks.map((task, index) => (
-								<TaskComponent {...task} indexTask={index} key={task.id}/>
-							))}
-              {provided.placeholder}
-						</div>
-					)}
-				</Droppable>
-			</div>
-		</>
-	);
+	return [{ id: uuidv4(), title: "TO DO", tasks: [{ id: uuidv4(), title: "Hello" }] }];
 };
 
 const Board = () => {
@@ -83,8 +24,8 @@ const Board = () => {
 	}, [columns]);
 
 	const handleDragEnd = (result) => {
+		console.log("result", result);
     const { source, destination } = result;
-    console.log(result);
     if (!destination) return;
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
@@ -100,7 +41,7 @@ const Board = () => {
 
 	const handleAddTask = () => {   
     const newColumns = [...columns];
-    const newTask = {title: newTaskInput,id: guidGenerator()}
+    const newTask = {title: newTaskInput,id: uuidv4()}
     newColumns[0].tasks.push(newTask); // Agregar tarea a la primera columna
     setColumns(newColumns);
     setNewTaskInput("");
@@ -108,7 +49,7 @@ const Board = () => {
 
   const handleAddColumn = () => {   
     const newColumns = [...columns];
-    const newColumn = {title: newColumnInput,id: guidGenerator(), tasks:[] }
+    const newColumn = {title: newColumnInput,id: uuidv4(), tasks:[] }
     newColumns.push(newColumn); // Agregar nueva columna
     setColumns(newColumns);
     setNewColumnInput("");
@@ -119,7 +60,7 @@ const Board = () => {
 			<DragDropContext onDragEnd={handleDragEnd}>
 				<div className="kanban-board">
 					{columns.map((column, index) => (
-						<ColumnComponent {...column} key={index} indexCol={index}/>
+						<ColumnComponent {...column} key={column.id} indexCol={index}/>
 					))}
 				</div>
 
@@ -137,8 +78,7 @@ const Board = () => {
 					/>
 					<button onClick={handleAddTask}>Agregar</button>
 				</div>
-
-
+				
         <div className="add-column">
 					<input
 						type="text"

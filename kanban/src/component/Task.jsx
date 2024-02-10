@@ -28,20 +28,20 @@ const TaskComponent = ({ id, title, indexTask, onEdit, onDelete }) => {
           ) : (
             <p>{title}</p>
           )}
-          {isEditing ? (
+          {isEditing? (
             <button
               onClick={() => {
                 setIsEditing(false);
                 onEdit(id, { title: editedContent });
               }}
             >
-              guardar
+              💾
             </button>
           ) : (
-            <>
-              <button onClick={handleDelete}>x</button>
-              <button onClick={()=>{setIsEditing(true)}}>o</button>
-            </>
+            <div className="task-actions">
+              <button className="action-button" onClick={handleDelete}>🗑️</button>
+              <button className="action-button" onClick={()=>{setIsEditing(true)}}>📝</button>
+            </div>
           )}
         </div>
       )}

@@ -4,28 +4,58 @@
 
 .column {
   flex: 1;
-  margin: 10px;
+  background-color: #f4f5f7;
+  border-radius: 3px;
   padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  margin-right: 10px;
 }
 
 .task {
-  margin-bottom: 10px;
+  background-color: #fff;
+  border: 1px solid #dfe1e6;
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(9,30,66,.25);
   padding: 10px;
-  border: 1px solid #eee;
-  background-color: #f9f9f9;
-  border-radius: 5px;
+  margin-bottom: 10px;
 }
 
 .task-list {
-  min-height: 100px;
+  background-color: #f4f5f7;
+  border-radius: 3px;
+  padding: 10px;
+  margin-right: 10px;
 }
 
 .task.dragging {
-  background-color: lightblue;
+  background-color: #ebecf0;
 }
 
 .task-list.dragging-over {
-  background-color: rgb(226, 234, 226);
+  background-color: #dfe1e6;
+}
+
+button, .action-button {
+  background-color: #0052cc;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin: 2px 1px;
+}
+
+button:hover {
+  background-color: #0079bf;
+}
+
+.task-actions {
+  display: none;
+}
+
+.task:hover .task-actions {
+  display:flex;
+}
+
+.action-button:hover {
+  background-color: #e9ecef;
 }

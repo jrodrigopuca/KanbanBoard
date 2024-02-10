@@ -21,3 +21,11 @@
 .task-list {
   min-height: 100px;
 }
+
+.task.dragging {
+  background-color: lightblue;
+}
+
+.task-list.dragging-over {
+  background-color: rgb(226, 234, 226);
+}

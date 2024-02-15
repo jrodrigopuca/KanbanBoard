@@ -10,7 +10,7 @@ const TaskComponent = ({ id, title, date, indexTask, onEdit, onDelete }) => {
     onDelete(id);
   };
 
-  const dateToShow = date? (new Date(date)).toLocaleString() : "";
+  const dateToShow = date? "🕙 " + (new Date(date)).toLocaleString() : "";
 
   return (
     <Draggable draggableId={id} index={indexTask} key={id}>

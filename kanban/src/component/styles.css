@@ -1,5 +1,22 @@
+:root{
+  --app-bg: #1E2630;
+  --app-c: #ccc8e5;
+  --column-bg: #353d47;
+  --column-c: #ccc8e5;
+  --column-drag-border: 2px dashed #444c56;
+  --task-bg: #3B394B;
+  --task-c: #ccc8e5;
+  --task-border-top: #57546A;
+  --task-drag-bg: #19152F;
+  --border-c: #444c56;
+  --border: 1px solid #444c56;
+  --button-bg: #334641;
+  --button-focus-bg: #687F7A;
+  --radius: 6px;
+}
+
 body{
-  background-color: #22272e;
+  background-color: var(--app-bg);
 }
 .kanban-board {
   display: flex;
@@ -7,49 +24,49 @@ body{
 
 .kanban-title{
   font-size: xx-large;
-  color: #adbac7;
+  color: var(--app-c);
   padding: 10px;
   margin: 10px;
 }
 
 .column {
   flex: 1;
-  background-color: #353d47;
+  background-color: var(--column-bg);
   padding: 10px;
   margin: 10px;
-  border: 1px solid #444c56;
-  border-radius: 6px;
-  color: #adbac7;
+  border: var(--border);
+  border-radius: var(--radius);
+  color: var(--column-c);
   min-width: 200px;
 }
 
 .task {
-  background-color: #3B394B;
-  border: 1px solid #444c56;
-  color: #adbac7;
-  border-radius: 6px;
-  box-shadow: 0 1px 0 rgba(9,30,66,.25);
+  background-color: var(--task-bg);
+  border: var(--border);
+  color: var(--task-c);
+  border-radius: var(--radius);
   padding: 10px;
   margin-bottom: 10px;
 }
 
 .task-list {
-  border-radius: 3px;
+  border-radius: var(--radius);
   margin: 0 10px;
 }
 
 .task.dragging {
-  background-color: #22272e;
+  background-color: var(--task-drag-bg);
   color: whitesmoke;
+  border-left: 5px solid #757388;
 }
 
 .task-list.dragging-over {
-  background-color: transparent;
-  border: 2px dashed #adbac7;
+  background-color: #1E2630;
+  border: var(--column-drag-border);
 }
 
 button, .action-button {
-  background-color: #768390;
+  background-color: var(--button-bg);
   color: #fff;
   border: none;
   border-radius: 3px;
@@ -60,20 +77,21 @@ button, .action-button {
 }
 
 button:hover, .action-button:hover {
-  background-color: #a0abb9;
+  background-color: var(--button-focus-bg);
 }
 
 button:disabled{
-  background-color: #28282a;
+  visibility: hidden;
 }
 
 .task-actions {
-  display: none;
+  visibility: hidden;
   flex-direction: row-reverse;
 }
 
 .task:hover .task-actions {
   display:flex;
+  visibility: visible;
 }
 
 .form-board{
@@ -84,8 +102,8 @@ button:disabled{
 }
 
 .input-agregar{
-  color: #768390;
-  border: 1px solid #444c56;
+  color: var(--app-c);
+  border: var(--border);
   border-radius: 3px;
   height: 2em;
   width: 50%;
@@ -102,8 +120,13 @@ button:disabled{
 .task-date{
   font-size: xx-small;
   margin:0;
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  padding: 3px;
+  width: fit-content;
 }
 
 .task-title{
   height: 2em;
+  font-weight: 600;
 }

@@ -118,9 +118,9 @@ button:disabled{
 }
 
 .task-date{
-  font-size: xx-small;
+  font-size: x-small;
   margin:0;
-  background-color: rgba(255,255,255,0.1);
+  background-color: #5A5674;
   border-radius: 3px;
   padding: 3px;
   width: fit-content;
@@ -129,4 +129,20 @@ button:disabled{
 .task-title{
   height: 2em;
   font-weight: 600;
+}
+
+.task-header{
+  display: flex;
+}
+
+.task-points{
+  font-size: x-small;
+  background-color: #5A5674;
+  border-radius: 50%;
+  margin-left: auto;
+  padding: 3px;
+  width: 1.5em;
+  height: 1.5em;
+  line-height: 1.5em;
+  text-align: center;
 }

@@ -13,25 +13,25 @@ const initColumns = () => {
   return [
     {
       id: uuidv4(),
-      title: "Backlog",
+      title: "TO DO",
       tasks: [
-        { id: uuidv4(), title: "Hello", date: Date.now() },
-        { id: uuidv4(), title: "World", date: Date.now() },
+        { id: uuidv4(), title: "Hello", date: Date.now(), points: 1 },
+        { id: uuidv4(), title: "World", date: Date.now(), points: 1 },
       ],
     },
     {
       id: uuidv4(),
-      title: "Doing",
+      title: "PROGRESS",
       tasks: [],
     },
     {
       id: uuidv4(),
-      title: "Review",
+      title: "TEST",
       tasks: [],
     },
     {
       id: uuidv4(),
-      title: "Done",
+      title: "DONE",
       tasks: [],
     },
 
@@ -104,7 +104,7 @@ const Board = () => {
 
   const handleAddTask = () => {
     const newColumns = [...columns];
-    const newTask = { title: newTaskInput, id: uuidv4(), date: Date.now() };
+    const newTask = { title: newTaskInput, id: uuidv4(), date: Date.now(), points: 1};
     newColumns[0].tasks.push(newTask); // Agregar tarea a la primera columna
     setColumns(newColumns);
     setNewTaskInput("");
@@ -112,7 +112,7 @@ const Board = () => {
 
   const handleAddColumn = () => {
     const newColumns = [...columns];
-    const newColumn = { title: newColumnInput, id: uuidv4(), tasks: [] };
+    const newColumn = { title: newColumnInput.toUpperCase(), id: uuidv4(), tasks: [] };
     newColumns.push(newColumn); // Agregar nueva columna
     setColumns(newColumns);
     setNewColumnInput("");

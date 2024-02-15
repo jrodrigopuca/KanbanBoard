@@ -1,61 +1,109 @@
+body{
+  background-color: #22272e;
+}
 .kanban-board {
   display: flex;
 }
 
+.kanban-title{
+  font-size: xx-large;
+  color: #adbac7;
+  padding: 10px;
+  margin: 10px;
+}
+
 .column {
   flex: 1;
-  background-color: #f4f5f7;
-  border-radius: 3px;
+  background-color: #353d47;
   padding: 10px;
-  margin-right: 10px;
+  margin: 10px;
+  border: 1px solid #444c56;
+  border-radius: 6px;
+  color: #adbac7;
+  min-width: 200px;
 }
 
 .task {
-  background-color: #fff;
-  border: 1px solid #dfe1e6;
-  border-radius: 3px;
+  background-color: #3B394B;
+  border: 1px solid #444c56;
+  color: #adbac7;
+  border-radius: 6px;
   box-shadow: 0 1px 0 rgba(9,30,66,.25);
   padding: 10px;
   margin-bottom: 10px;
 }
 
 .task-list {
-  background-color: #f4f5f7;
   border-radius: 3px;
-  padding: 10px;
-  margin-right: 10px;
+  margin: 0 10px;
 }
 
 .task.dragging {
-  background-color: #ebecf0;
+  background-color: #22272e;
+  color: whitesmoke;
 }
 
 .task-list.dragging-over {
-  background-color: #dfe1e6;
+  background-color: transparent;
+  border: 2px dashed #adbac7;
 }
 
 button, .action-button {
-  background-color: #0052cc;
+  background-color: #768390;
   color: #fff;
   border: none;
   border-radius: 3px;
-  padding: 8px 12px;
+  padding: 0px 1em;
   cursor: pointer;
-  margin: 2px 1px;
+  margin: 0px 6px;
+  height: 2em;
 }
 
-button:hover {
-  background-color: #0079bf;
+button:hover, .action-button:hover {
+  background-color: #a0abb9;
+}
+
+button:disabled{
+  background-color: #28282a;
 }
 
 .task-actions {
   display: none;
+  flex-direction: row-reverse;
 }
 
 .task:hover .task-actions {
   display:flex;
 }
 
-.action-button:hover {
-  background-color: #e9ecef;
+.form-board{
+  display: flex;
+  flex-direction: column;  
+  padding: 10px;
+  margin: 10px 10px;
+}
+
+.input-agregar{
+  color: #768390;
+  border: 1px solid #444c56;
+  border-radius: 3px;
+  height: 2em;
+  width: 50%;
+  margin: 10px;
+  background-color: #2d333b;
+  padding: 0px 10px;
+  font-size: 1em;
+}
+
+.input-agregar:focus{
+  color:#e4e2e2;
+}
+
+.task-date{
+  font-size: xx-small;
+  margin:0;
+}
+
+.task-title{
+  height: 2em;
 }

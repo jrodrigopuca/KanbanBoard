@@ -13,12 +13,28 @@ const initColumns = () => {
   return [
     {
       id: uuidv4(),
-      title: "TO DO",
+      title: "Backlog",
       tasks: [
-        { id: uuidv4(), title: "Hello" },
-        { id: uuidv4(), title: "llo" },
+        { id: uuidv4(), title: "Hello", date: Date.now() },
+        { id: uuidv4(), title: "World", date: Date.now() },
       ],
     },
+    {
+      id: uuidv4(),
+      title: "Doing",
+      tasks: [],
+    },
+    {
+      id: uuidv4(),
+      title: "Review",
+      tasks: [],
+    },
+    {
+      id: uuidv4(),
+      title: "Done",
+      tasks: [],
+    },
+
   ];
 };
 
@@ -68,6 +84,7 @@ const Board = () => {
     if (source.droppableId === destination.droppableId) {
       const column = newColumns.find((col) => col.id === source.droppableId);
       const [movedTask] = column.tasks.splice(source.index, 1);
+      movedTask.date= Date.now();
       column.tasks.splice(destination.index, 0, movedTask);
     } else {
       // Movimiento entre columnas
@@ -78,6 +95,7 @@ const Board = () => {
         (col) => col.id === destination.droppableId
       );
       const [movedTask] = sourceColumn.tasks.splice(source.index, 1);
+      movedTask.date= Date.now();
       destinationColumn.tasks.splice(destination.index, 0, movedTask);
     }
 
@@ -86,7 +104,7 @@ const Board = () => {
 
   const handleAddTask = () => {
     const newColumns = [...columns];
-    const newTask = { title: newTaskInput, id: uuidv4() };
+    const newTask = { title: newTaskInput, id: uuidv4(), date: Date.now() };
     newColumns[0].tasks.push(newTask); // Agregar tarea a la primera columna
     setColumns(newColumns);
     setNewTaskInput("");
@@ -102,15 +120,19 @@ const Board = () => {
 
   return (
     <>
+      <div className="kanban-title">Kanban Board</div>
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="kanban-board">
           {columns.map((column) => (
             <ColumnComponent {...column} key={column.id} taskFunctions={taskFunctions}/>
           ))}
         </div>
+      </DragDropContext>
 
+      <div className="form-board">
         <div className="add-task">
           <input
+            className="input-agregar"
             type="text"
             placeholder="Nueva Tarea"
             value={newTaskInput}
@@ -121,12 +143,13 @@ const Board = () => {
               }
             }}
           />
-          <button onClick={handleAddTask}>+T</button>
+          <button className="action-button" disabled={!newTaskInput} onClick={handleAddTask}>+T</button>
         </div>
 
         <div className="add-column">
           <input
             type="text"
+            className="input-agregar"
             placeholder="Nueva Columna"
             value={newColumnInput}
             onChange={(e) => setNewColumnInput(e.target.value)}
@@ -136,9 +159,9 @@ const Board = () => {
               }
             }}
           />
-          <button onClick={handleAddColumn}>+C</button>
+          <button className="action-button" disabled={!newColumnInput}  onClick={handleAddColumn}>+C</button>
         </div>
-      </DragDropContext>
+      </div>
     </>
   );
 };

@@ -6,7 +6,7 @@ import "./styles.css";
 const ColumnComponent = ({ id, title, tasks, taskFunctions }) => {
   return (
     <div className="column">
-      <h2>{title}</h2>
+      <h2>{title} ({tasks.length})</h2>
       <Droppable droppableId={id}>
         {(provided, snapshot) => (
           <div

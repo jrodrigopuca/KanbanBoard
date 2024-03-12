@@ -74,5 +74,4 @@ const TaskComponent = ({ id, title, date, points, indexTask, onEdit, onDelete })
     </Draggable>
   );
 };
-
 export default TaskComponent;

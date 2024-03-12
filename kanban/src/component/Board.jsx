@@ -132,9 +132,9 @@ const Board = () => {
       <div className="form-board">
         <div className="add-task">
           <input
-            className="input-agregar"
+            className="input-add"
             type="text"
-            placeholder="Nueva Tarea"
+            placeholder="New Task"
             value={newTaskInput}
             onChange={(e) => setNewTaskInput(e.target.value)}
             onKeyDown={(e) => {
@@ -149,8 +149,8 @@ const Board = () => {
         <div className="add-column">
           <input
             type="text"
-            className="input-agregar"
-            placeholder="Nueva Columna"
+            className="input-add"
+            placeholder="New Column"
             value={newColumnInput}
             onChange={(e) => setNewColumnInput(e.target.value)}
             onKeyDown={(e) => {

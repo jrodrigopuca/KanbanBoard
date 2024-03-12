@@ -101,7 +101,7 @@ button:disabled{
   margin: 10px 10px;
 }
 
-.input-agregar{
+.input-add{
   color: var(--app-c);
   border: var(--border);
   border-radius: 3px;
@@ -113,7 +113,7 @@ button:disabled{
   font-size: 1em;
 }
 
-.input-agregar:focus{
+.input-add:focus{
   color:#e4e2e2;
 }
 

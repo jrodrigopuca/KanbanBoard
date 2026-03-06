@@ -4,48 +4,66 @@ import { v4 as uuidv4 } from "uuid";
 import ColumnComponent from "./Column";
 import "./styles.css";
 
+const STORAGE_KEY = "localColumns";
+
+const createDefaultColumns = () => [
+  {
+    id: uuidv4(),
+    title: "TO DO",
+    tasks: [
+      { id: uuidv4(), title: "Hello", date: Date.now(), points: 1 },
+      { id: uuidv4(), title: "World", date: Date.now(), points: 1 },
+    ],
+  },
+  {
+    id: uuidv4(),
+    title: "PROGRESS",
+    tasks: [],
+  },
+  {
+    id: uuidv4(),
+    title: "TEST",
+    tasks: [],
+  },
+  {
+    id: uuidv4(),
+    title: "DONE",
+    tasks: [],
+  },
+];
+
 // inicializa columnas
 const initColumns = () => {
-  const savedColumns = localStorage.getItem("localColumns");
-  if (savedColumns) {
-    return JSON.parse(savedColumns);
-  }
-  return [
-    {
-      id: uuidv4(),
-      title: "TO DO",
-      tasks: [
-        { id: uuidv4(), title: "Hello", date: Date.now(), points: 1 },
-        { id: uuidv4(), title: "World", date: Date.now(), points: 1 },
-      ],
-    },
-    {
-      id: uuidv4(),
-      title: "PROGRESS",
-      tasks: [],
-    },
-    {
-      id: uuidv4(),
-      title: "TEST",
-      tasks: [],
-    },
-    {
-      id: uuidv4(),
-      title: "DONE",
-      tasks: [],
-    },
+  try {
+    const savedColumns = localStorage.getItem(STORAGE_KEY);
 
-  ];
+    if (savedColumns) {
+      const parsedColumns = JSON.parse(savedColumns);
+
+      if (Array.isArray(parsedColumns)) {
+        return parsedColumns;
+      }
+    }
+  } catch (error) {
+    console.error("Unable to load board data from localStorage.", error);
+  }
+
+  return createDefaultColumns();
 };
 
 const Board = () => {
   const [columns, setColumns] = useState(initColumns);
   const [newColumnInput, setNewColumnInput] = useState("");
   const [newTaskInput, setNewTaskInput] = useState("");
+  const [columnPendingDelete, setColumnPendingDelete] = useState(null);
 
   // guardar columnas ante un cambio
   useEffect(() => {
-    localStorage.setItem("localColumns", JSON.stringify(columns));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(columns));
+    } catch (error) {
+      console.error("Unable to save board data to localStorage.", error);
+    }
   }, [columns]);
 
   const taskFunctions = {
@@ -77,45 +95,118 @@ const Board = () => {
   const handleDragEnd = (result) => {
     const { source, destination } = result;
     if (!destination) return;
-
-    const newColumns = [...columns];
-
-    // Movimiento dentro de la misma columna
-    if (source.droppableId === destination.droppableId) {
-      const column = newColumns.find((col) => col.id === source.droppableId);
-      const [movedTask] = column.tasks.splice(source.index, 1);
-      movedTask.date= Date.now();
-      column.tasks.splice(destination.index, 0, movedTask);
-    } else {
-      // Movimiento entre columnas
-      const sourceColumn = newColumns.find(
-        (col) => col.id === source.droppableId
-      );
-      const destinationColumn = newColumns.find(
-        (col) => col.id === destination.droppableId
-      );
-      const [movedTask] = sourceColumn.tasks.splice(source.index, 1);
-      movedTask.date= Date.now();
-      destinationColumn.tasks.splice(destination.index, 0, movedTask);
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
     }
+
+    const newColumns = columns.map((column) => ({
+      ...column,
+      tasks: [...column.tasks],
+    }));
+
+    const sourceColumn = newColumns.find((col) => col.id === source.droppableId);
+    const destinationColumn = newColumns.find(
+      (col) => col.id === destination.droppableId
+    );
+
+    if (!sourceColumn || !destinationColumn) {
+      return;
+    }
+
+    const [movedTask] = sourceColumn.tasks.splice(source.index, 1);
+
+    if (!movedTask) {
+      return;
+    }
+
+    const updatedTask = {
+      ...movedTask,
+      date: Date.now(),
+    };
+
+    destinationColumn.tasks.splice(destination.index, 0, updatedTask);
 
     setColumns(newColumns);
   };
 
   const handleAddTask = () => {
-    const newColumns = [...columns];
-    const newTask = { title: newTaskInput, id: uuidv4(), date: Date.now(), points: 1};
-    newColumns[0].tasks.push(newTask); // Agregar tarea a la primera columna
-    setColumns(newColumns);
+    const title = newTaskInput.trim();
+
+    if (!title || !columns.length) {
+      return;
+    }
+
+    const newTask = { title, id: uuidv4(), date: Date.now(), points: 1 };
+
+    setColumns((currentColumns) =>
+      currentColumns.map((column, index) =>
+        index === 0
+          ? { ...column, tasks: [...column.tasks, newTask] }
+          : column
+      )
+    );
     setNewTaskInput("");
   };
 
   const handleAddColumn = () => {
-    const newColumns = [...columns];
-    const newColumn = { title: newColumnInput.toUpperCase(), id: uuidv4(), tasks: [] };
-    newColumns.push(newColumn); // Agregar nueva columna
-    setColumns(newColumns);
+    const title = newColumnInput.trim().toUpperCase();
+
+    if (!title) {
+      return;
+    }
+
+    const newColumn = { title, id: uuidv4(), tasks: [] };
+
+    setColumns((currentColumns) => [...currentColumns, newColumn]);
     setNewColumnInput("");
+  };
+
+  const handleRenameColumn = (columnId, nextTitle) => {
+    const title = nextTitle.trim().toUpperCase();
+
+    if (!title) {
+      return false;
+    }
+
+    setColumns((currentColumns) =>
+      currentColumns.map((column) =>
+        column.id === columnId ? { ...column, title } : column
+      )
+    );
+
+    return true;
+  };
+
+  const handleRequestDeleteColumn = (columnId) => {
+    const columnToDelete = columns.find((column) => column.id === columnId);
+
+    if (!columnToDelete || columns.length <= 1) {
+      return;
+    }
+
+    setColumnPendingDelete({
+      id: columnToDelete.id,
+      title: columnToDelete.title,
+      taskCount: columnToDelete.tasks.length,
+    });
+  };
+
+  const handleCloseDeleteModal = () => {
+    setColumnPendingDelete(null);
+  };
+
+  const handleConfirmDeleteColumn = () => {
+    if (!columnPendingDelete) {
+      return;
+    }
+
+    setColumns((currentColumns) =>
+      currentColumns.filter((column) => column.id !== columnPendingDelete.id)
+    );
+    setColumnPendingDelete(null);
   };
 
   return (
@@ -124,7 +215,14 @@ const Board = () => {
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="kanban-board">
           {columns.map((column) => (
-            <ColumnComponent {...column} key={column.id} taskFunctions={taskFunctions}/>
+            <ColumnComponent
+              {...column}
+              key={column.id}
+              canDeleteColumn={columns.length > 1}
+              onDeleteColumn={handleRequestDeleteColumn}
+              onRenameColumn={handleRenameColumn}
+              taskFunctions={taskFunctions}
+            />
           ))}
         </div>
       </DragDropContext>
@@ -162,6 +260,31 @@ const Board = () => {
           <button className="action-button" disabled={!newColumnInput}  onClick={handleAddColumn}>+C</button>
         </div>
       </div>
+
+      {columnPendingDelete && (
+        <div className="modal-overlay" role="presentation">
+          <div
+            aria-labelledby="delete-column-title"
+            aria-modal="true"
+            className="confirmation-modal"
+            role="dialog"
+          >
+            <h2 id="delete-column-title">Delete column {columnPendingDelete.title}?</h2>
+            <p>
+              This action will remove the column and permanently delete all its
+              cards ({columnPendingDelete.taskCount}).
+            </p>
+            <div className="modal-actions">
+              <button className="action-button" onClick={handleCloseDeleteModal} type="button">
+                Cancel
+              </button>
+              <button className="action-button danger-button" onClick={handleConfirmDeleteColumn} type="button">
+                Delete column
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

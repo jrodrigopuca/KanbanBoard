@@ -16,6 +16,7 @@
 | --------------------- | ---------------------------------------------- |
 | `open`                | Identificado, no triageado aún                 |
 | `known`               | Confirmado y reconocido                        |
+| `resolved`            | Solucionado y verificado en el repositorio     |
 | `accepted`            | Tolerado intencionalmente por ahora            |
 | `deferred`            | Issue válido, pospuesto para trabajo futuro    |
 | `needs-clarification` | Requiere más información o una decisión futura |
@@ -24,82 +25,71 @@
 
 ### KI-001: Test de ejemplo roto
 
-- Status: `known`
+- Status: `resolved`
 - Category: `tooling`
 - Affects: `kanban/src/App.test.js`
 
 **Summary**
 
-El test generado por Create React App busca el texto "learn react" que fue eliminado cuando se reemplazó el contenido por defecto con el componente `Board`. Ejecutar `npm test` falla con este test.
+El test heredado de Create React App fue reemplazado por pruebas alineadas con la UI real del tablero. Ahora se valida el render del título y de las columnas por defecto, y también el fallback cuando `localStorage` contiene JSON inválido.
 
 **Evidence**
 
-- `kanban/src/App.test.js` — el test usa `screen.getByText(/learn react/i)` pero ese texto no existe en la aplicación
-- `kanban/src/App.js` — renderiza `<Board />`, no el contenido por defecto de CRA
+- `kanban/src/App.test.js` — contiene pruebas para el render del tablero y para recuperación ante datos persistidos inválidos
+- `kanban/src/App.js` — sigue renderizando `<Board />`, ahora cubierto por pruebas acordes a la aplicación
+- Validación manual: `CI=true npm test -- --watch=false` ejecutado con resultado exitoso
 
 ---
 
 ### KI-002: Sin manejo de errores en localStorage
 
-- Status: `open`
+- Status: `resolved`
 - Category: `architecture`
 - Affects: `kanban/src/component/Board.jsx`
 
 **Summary**
 
-Las operaciones de lectura y escritura de `localStorage` no están envueltas en `try/catch`. Si `localStorage` está lleno, deshabilitado por el navegador, o contiene JSON corrupto, la aplicación puede fallar silenciosamente o lanzar una excepción no capturada.
+La inicialización y persistencia del tablero ahora envuelven el acceso a `localStorage` en `try/catch`. Si hay JSON corrupto o falla la escritura, la app evita romperse y conserva un fallback seguro con columnas por defecto.
 
 **Evidence**
 
-- `kanban/src/component/Board.jsx` — `initColumns()` llama `localStorage.getItem()` y `JSON.parse()` sin protección (línea 9-11); el `useEffect` llama `localStorage.setItem()` sin protección (línea 49)
+- `kanban/src/component/Board.jsx` — `initColumns()` protege `getItem()` y `JSON.parse()` con `try/catch` y vuelve a `createDefaultColumns()` cuando falla la carga
+- `kanban/src/component/Board.jsx` — el `useEffect` protege `localStorage.setItem()` con `try/catch`
+- `kanban/src/App.test.js` — hay una prueba explícita para JSON inválido en `localStorage`
 
 ---
 
 ### KI-003: Mutación directa de estado en handlers
 
-- Status: `open`
+- Status: `resolved`
 - Category: `architecture`
 - Affects: `kanban/src/component/Board.jsx`
 
 **Summary**
 
-Los handlers `handleDragEnd` y `handleAddTask` realizan una copia superficial del array de columnas (`[...columns]`) pero luego mutan directamente los objetos internos (columnas y sus arrays de tareas) usando `splice()` y `push()`. Esto viola el principio de inmutabilidad de React y puede causar bugs sutiles en re-renderizados.
+Los handlers principales del tablero ahora crean nuevas referencias para columnas y tareas antes de reordenar o insertar elementos. Con ello se elimina la mutación directa del estado anidado y se mantiene el patrón inmutable esperado por React.
 
 **Evidence**
 
-- `kanban/src/component/Board.jsx` — `handleDragEnd` usa `column.tasks.splice()` sobre objetos referenciados del estado original (línea 86-88); `handleAddTask` usa `newColumns[0].tasks.push()` que muta el array de tareas del mismo objeto (línea 107)
+- `kanban/src/component/Board.jsx` — `handleDragEnd` clona cada columna y su array `tasks` antes de usar `splice()` sobre copias seguras
+- `kanban/src/component/Board.jsx` — `handleAddTask` usa `setColumns()` funcional y crea un nuevo array `tasks` con spread
+- `kanban/src/component/Board.jsx` — `handleAddColumn` también fue ajustado a actualización funcional para mantener consistencia
 
 ---
 
 ### KI-004: Falta prop `key` en iteración de TaskComponent
 
-- Status: `open`
+- Status: `resolved`
 - Category: `architecture`
 - Affects: `kanban/src/component/Column.jsx`
 
 **Summary**
 
-En el `map` de tareas dentro de `Column.jsx`, el componente `TaskComponent` no recibe una prop `key` explícita. Aunque `Draggable` internamente usa `draggableId`, React producirá un warning por la falta de `key` en el elemento del iterador.
+El renderizado de tareas ahora asigna una prop `key` explícita basada en `task.id` sobre el elemento retornado por el `map`, evitando el warning de React y mejorando la estabilidad del reconciliador.
 
 **Evidence**
 
-- `kanban/src/component/Column.jsx` — `tasks.map((task, index) => (<TaskComponent {...task} indexTask={index} .../>))` sin prop `key` (línea 22-24)
-
----
-
-### KI-005: No se pueden eliminar columnas
-
-- Status: `accepted`
-- Category: `architecture`
-- Affects: `kanban/src/component/Board.jsx`
-
-**Summary**
-
-La aplicación permite agregar columnas pero no ofrece funcionalidad para eliminarlas ni editarlas. La única forma de remover una columna es limpiar `localStorage` manualmente.
-
-**Evidence**
-
-- `kanban/src/component/Board.jsx` — existe `handleAddColumn` pero no hay `handleDeleteColumn` ni `handleEditColumn`
+- `kanban/src/component/Column.jsx` — `tasks.map(...)` ahora renderiza `<TaskComponent key={task.id} ... />`
 
 ---
 
@@ -122,18 +112,36 @@ La aplicación permite agregar columnas pero no ofrece funcionalidad para elimin
 
 ### KI-007: Carpeta build commiteada en el repositorio
 
-- Status: `needs-clarification`
+- Status: `resolved`
 - Category: `tooling`
 - Affects: `kanban/build/`
 
 **Summary**
 
-La carpeta `build/` con los artefactos de producción está incluida en el repositorio. Esto puede causar conflictos de merge innecesarios y aumentar el tamaño del repo. Sin embargo, podría ser intencional si se usa para despliegue directo desde el repositorio (ej. GitHub Pages).
+La carpeta `build/` no debe versionarse. El proyecto ya incluye la regla `/build` en `.gitignore` y los artefactos compilados se retiraron del árbol del repositorio para que esta salida se use solo de forma local.
 
 **Evidence**
 
-- `kanban/build/` — contiene `index.html`, archivos CSS y JS minificados con hashes
-- `kanban/package.json` — `homepage: "https://yardev.net/kanban"` sugiere despliegue estático
+- `kanban/.gitignore` — contiene la regla `/build`
+- `kanban/build/` — los artefactos compilados fueron eliminados del repositorio
+
+## Backlog funcional
+
+### BF-001: Gestión de columnas
+
+- Type: `feature`
+- Status: `done`
+- Affects: `kanban/src/component/Board.jsx`
+
+**Summary**
+
+La edición y eliminación de columnas ya se implementó como mejora del tablero. La eliminación usa una confirmación modal, porque también borra todas las cards de la columna.
+
+**Evidence**
+
+- `kanban/src/component/Board.jsx` — existen handlers para renombrar columnas, solicitar eliminación y confirmar mediante modal
+- `kanban/src/component/Column.jsx` — cada columna expone acciones para editar y eliminar
+- `kanban/src/App.test.js` — hay cobertura para renombrado y borrado con confirmación
 
 ## Sources Inspected
 
@@ -143,6 +151,6 @@ La carpeta `build/` con los artefactos de producción está incluida en el repos
 - `kanban/src/App.test.js` — test roto
 - `kanban/src/index.js` — StrictMode ausente
 - `kanban/package.json` — dependencias y homepage
-- `kanban/build/` — artefactos de producción en el repo
+- `kanban/.gitignore` — exclusión de artefactos de build
 - `docs/architecture.md` — constraints y trade-offs identificados
 - `docs/development-guide.md` — problemas comunes documentados

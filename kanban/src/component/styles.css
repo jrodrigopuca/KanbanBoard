@@ -40,6 +40,38 @@ body{
   min-width: 200px;
 }
 
+.column-header {
+  margin-bottom: 10px;
+}
+
+.column-title-row,
+.column-title-editor,
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.column-title-row h2,
+.confirmation-modal h2 {
+  margin: 0;
+}
+
+.column-title-row h2 {
+  flex: 1;
+}
+
+.column-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.column-title-input {
+  width: 100%;
+  margin: 0;
+}
+
 .task {
   background-color: var(--task-bg);
   border: var(--border);
@@ -99,6 +131,42 @@ button:disabled{
   flex-direction: column;  
   padding: 10px;
   margin: 10px 10px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(15, 23, 33, 0.75);
+  padding: 16px;
+}
+
+.confirmation-modal {
+  width: min(420px, 100%);
+  background-color: var(--column-bg);
+  border: var(--border);
+  border-radius: var(--radius);
+  color: var(--column-c);
+  padding: 20px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+.confirmation-modal p {
+  margin: 16px 0;
+}
+
+.modal-actions {
+  justify-content: flex-end;
+}
+
+.danger-button {
+  background-color: #7b3b44;
+}
+
+.danger-button:hover {
+  background-color: #99515b;
 }
 
 .input-add{

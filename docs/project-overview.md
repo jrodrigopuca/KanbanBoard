@@ -70,6 +70,7 @@ KanbanBoard/
 - Base path: `docs/`
 - [Architecture](architecture.md)
 - [Development Guide](development-guide.md)
+- [Improvements Backlog](improvements.md)
 - [Known Issues](known-issues.md)
 
 ## Sources Inspected

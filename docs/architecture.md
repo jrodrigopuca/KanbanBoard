@@ -33,9 +33,13 @@ graph TB
         Page --> VM[useBoardViewModel.js<br>Estado y acciones]
         VM --> UseCases[application/use-cases<br>Reglas de aplicación]
         UseCases --> Repo[localStorageBoardRepository<br>Persistencia]
+        UseCases --> ExportUC[exportBoard.js<br>Serialización JSON/CSV]
         Page --> Board[BoardView.jsx<br>Presentación]
         Board --> Column[ColumnView.jsx<br>Columna droppable]
         Column --> Task[TaskCard.jsx<br>Tarjeta draggable]
+        Board --> Palette[CommandPalette.jsx<br>Acciones rápidas]
+        Board --> Drawer[TaskDetailDrawer.jsx<br>Detalle lateral]
+        VM --> Download[downloadFile.js<br>Descarga en navegador]
         Repo <-->|lee/escribe| LS[(localStorage<br>Persistencia)]
         Board -.->|DragDropContext| DND[@hello-pangea/dnd]
         Column -.->|Droppable| DND
@@ -55,6 +59,8 @@ graph TB
 | `BoardView`         | Presentacional          | Renderiza la estructura general del tablero                                          |
 | `ColumnView`        | Presentacional          | Renderiza una columna como zona `Droppable`, muestra título y contador de tareas     |
 | `TaskCard`          | Stateful (local)        | Renderiza tarjeta `Draggable` con edición inline, eliminación y puntos de estimación |
+| `TaskDetailDrawer`  | Stateful (local)        | Permite editar metadata enriquecida de una tarea                                     |
+| `CommandPalette`    | Presentacional          | Expone búsqueda y ejecución rápida de acciones del tablero                           |
 
 ### Flujo de datos
 
@@ -65,6 +71,7 @@ El flujo de datos sigue un patrón **unidireccional de arriba hacia abajo**:
 3. `BoardView` pasa datos y callbacks a `ColumnView`
 4. `ColumnView` pasa datos y callbacks a `TaskCard`
 5. `useBoardViewModel` invoca casos de uso y persiste cambios mediante `localStorageBoardRepository`
+6. Las acciones globales como exportación, toasts y command palette se disparan desde `BoardView`, pero siguen delegando la ejecución al view model
 
 ## Key Flows
 
@@ -115,8 +122,10 @@ sequenceDiagram
 | Persistencia      | `localStorage` — a través de `localStorageBoardRepository` y serialización JSON automática          |
 | Generación de IDs | `crypto.randomUUID()` con fallback simple — IDs únicos para columnas y tareas                       |
 | Estilos           | CSS con variables custom (CSS custom properties) en `:root`, tema oscuro                            |
+| Exportación       | Serialización JSON/CSV vía `exportBoard.js` y descarga mediante `downloadFile.js`                   |
+| Notificaciones    | Toast local controlado desde `useBoardViewModel` con soporte de undo para borrados recientes        |
 | Error handling    | Manejo básico con `try/catch` en lectura/escritura de `localStorage`; no hay capa global de errores |
-| Testing           | Vitest + React Testing Library — cobertura básica de render, fallback y gestión de columnas         |
+| Testing           | Vitest + React Testing Library — cobertura de render, fallback, detalle de tasks, export y undo     |
 
 ## Constraints and Trade-offs
 
@@ -129,10 +138,14 @@ sequenceDiagram
 
 - `kanban/src/ui/board/useBoardViewModel.js` — lógica de estado, CRUD, drag & drop, persistencia
 - `kanban/src/ui/board/BoardView.jsx` — estructura general del tablero
+- `kanban/src/ui/board/CommandPalette.jsx` — paleta de comandos y búsqueda de acciones
 - `kanban/src/ui/column/ColumnView.jsx` — estructura de columna droppable
 - `kanban/src/ui/task/TaskCard.jsx` — estructura de tarea draggable y lógica de edición
+- `kanban/src/ui/task/TaskDetailDrawer.jsx` — edición ampliada de metadata de tareas
 - `kanban/src/App.js` — componente raíz
 - `kanban/index.html` — entrada HTML de Vite
 - `kanban/src/index.js` — punto de entrada
 - `kanban/src/ui/shared/board.css` — sistema de diseño con CSS custom properties
+- `kanban/src/application/use-cases/exportBoard.js` — serialización de exportación
+- `kanban/src/infrastructure/export/downloadFile.js` — descarga de archivos en navegador
 - `kanban/package.json` — dependencias y stack tecnológico

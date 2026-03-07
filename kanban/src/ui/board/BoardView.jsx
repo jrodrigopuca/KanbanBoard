@@ -1,4 +1,6 @@
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
+import CommandPalette from "./CommandPalette";
 import ColumnView from "../column/ColumnView";
 import TaskDetailDrawer from "../task/TaskDetailDrawer";
 import "../shared/board.css";
@@ -9,6 +11,7 @@ const BoardView = ({
     newTaskInput,
     columnPendingDelete,
     selectedTask,
+    toast,
     setNewColumnInput,
     setNewTaskInput,
     onUpdateTask,
@@ -25,7 +28,14 @@ const BoardView = ({
     onCloseTaskDetails,
     onExportJson,
     onExportCsv,
+    onDismissToast,
+    onUndoToast,
 }) => {
+    const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+    const [commandQuery, setCommandQuery] = useState("");
+    const [activeCommandIndex, setActiveCommandIndex] = useState(0);
+    const addTaskInputRef = useRef(null);
+    const addColumnInputRef = useRef(null);
     const totalTasks = columns.reduce(
         (taskCount, column) => taskCount + column.tasks.length,
         0,
@@ -33,6 +43,154 @@ const BoardView = ({
     const populatedColumns = columns.filter((column) => column.tasks.length > 0).length;
     const hasColumns = columns.length > 0;
     const hasTasks = totalTasks > 0;
+
+    const closeCommandPalette = () => {
+        setIsCommandPaletteOpen(false);
+        setCommandQuery("");
+        setActiveCommandIndex(0);
+    };
+
+    const runPaletteCommand = (commandAction) => {
+        commandAction();
+        closeCommandPalette();
+    };
+
+    const focusTaskComposer = () => {
+        addTaskInputRef.current?.focus();
+    };
+
+    const focusColumnComposer = () => {
+        addColumnInputRef.current?.focus();
+    };
+
+    const allTaskCommands = columns.flatMap((column) =>
+        column.tasks.map((task) => ({
+            id: `task-${task.id}`,
+            label: `Open task: ${task.title}`,
+            group: "Tasks",
+            description: `Open details from ${column.title}`,
+            action: () => runPaletteCommand(() => onOpenTaskDetails(task.id)),
+        })),
+    );
+
+    const paletteCommands = useMemo(
+        () => [
+            {
+                id: "focus-task",
+                label: "Focus new task input",
+                group: "Board",
+                description: "Jump to the quick add task composer",
+                action: () => runPaletteCommand(focusTaskComposer),
+            },
+            {
+                id: "focus-column",
+                label: "Focus new column input",
+                group: "Board",
+                description: "Jump to the new column composer",
+                action: () => runPaletteCommand(focusColumnComposer),
+            },
+            {
+                id: "export-json",
+                label: "Export board as JSON",
+                group: "Export",
+                description: "Download the current board state as JSON",
+                action: () => runPaletteCommand(onExportJson),
+            },
+            {
+                id: "export-csv",
+                label: "Export board as CSV",
+                group: "Export",
+                description: "Download tasks and metadata in CSV format",
+                action: () => runPaletteCommand(onExportCsv),
+            },
+            {
+                id: "restore-board",
+                label: "Restore starter board",
+                group: "Board",
+                description: "Reset columns and starter tasks",
+                action: () => runPaletteCommand(onRestoreDefaultBoard),
+            },
+            ...allTaskCommands,
+        ],
+        [allTaskCommands, onExportCsv, onExportJson, onRestoreDefaultBoard],
+    );
+
+    const filteredCommands = useMemo(() => {
+        const nextQuery = commandQuery.trim().toLowerCase();
+
+        if (!nextQuery) {
+            return paletteCommands;
+        }
+
+        const queryTokens = nextQuery.split(/\s+/).filter(Boolean);
+
+        return paletteCommands.filter((command) =>
+            queryTokens.every((token) =>
+                [command.label, command.group, command.description]
+                .filter(Boolean)
+                .some((value) => value.toLowerCase().includes(token)),
+            ),
+        );
+    }, [commandQuery, paletteCommands]);
+
+    useEffect(() => {
+        if (filteredCommands.length === 0) {
+            setActiveCommandIndex(0);
+            return;
+        }
+
+        setActiveCommandIndex((currentIndex) =>
+            Math.min(currentIndex, filteredCommands.length - 1),
+        );
+    }, [filteredCommands]);
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+                event.preventDefault();
+                setIsCommandPaletteOpen((currentValue) => !currentValue);
+            }
+
+            if (event.key === "Escape") {
+                setIsCommandPaletteOpen(false);
+                setCommandQuery("");
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, []);
+
+    const handleSubmitFirstCommand = () => {
+        if (filteredCommands.length === 0) {
+            return;
+        }
+
+        filteredCommands[activeCommandIndex]?.action();
+    };
+
+    const handleSelectNextCommand = () => {
+        if (filteredCommands.length === 0) {
+            return;
+        }
+
+        setActiveCommandIndex((currentIndex) =>
+            currentIndex >= filteredCommands.length - 1 ? 0 : currentIndex + 1,
+        );
+    };
+
+    const handleSelectPreviousCommand = () => {
+        if (filteredCommands.length === 0) {
+            return;
+        }
+
+        setActiveCommandIndex((currentIndex) =>
+            currentIndex <= 0 ? filteredCommands.length - 1 : currentIndex - 1,
+        );
+    };
 
     return (
         <>
@@ -72,6 +230,7 @@ const BoardView = ({
                         </div>
                         <div className="composer-form add-task">
                             <input
+                                ref={addTaskInputRef}
                                 className="input-add"
                                 type="text"
                                 placeholder="New Task"
@@ -102,6 +261,7 @@ const BoardView = ({
                         </div>
                         <div className="composer-form add-column">
                             <input
+                                ref={addColumnInputRef}
                                 type="text"
                                 className="input-add"
                                 placeholder="New Column"
@@ -134,6 +294,13 @@ const BoardView = ({
                             </p>
                         </div>
                         <div className="composer-form export-actions">
+                            <button
+                                className="action-button subtle-button"
+                                onClick={() => setIsCommandPaletteOpen(true)}
+                                type="button"
+                            >
+                                Open palette
+                            </button>
                             <button
                                 className="action-button subtle-button"
                                 onClick={onExportJson}
@@ -273,6 +440,45 @@ const BoardView = ({
                     onDeleteTask={onDeleteTask}
                     onSaveTask={onUpdateTask}
                 />
+            )}
+
+            <CommandPalette
+                activeCommandId={filteredCommands[activeCommandIndex]?.id}
+                commands={filteredCommands}
+                isOpen={isCommandPaletteOpen}
+                onClose={closeCommandPalette}
+                onQueryChange={setCommandQuery}
+                onSelectNext={handleSelectNextCommand}
+                onSelectPrevious={handleSelectPreviousCommand}
+                onSubmit={handleSubmitFirstCommand}
+                query={commandQuery}
+            />
+
+            {toast && (
+                <div className="toast-region" aria-live="polite" aria-atomic="true">
+                    <div className="toast-card" role="status">
+                        <p className="toast-message">{toast.message}</p>
+                        <div className="toast-actions">
+                            {toast.previousColumns && (
+                                <button
+                                    className="action-button primary-button"
+                                    onClick={onUndoToast}
+                                    type="button"
+                                >
+                                    Undo
+                                </button>
+                            )}
+                            <button
+                                aria-label="Dismiss notification"
+                                className="action-button subtle-button"
+                                onClick={onDismissToast}
+                                type="button"
+                            >
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     );

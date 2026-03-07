@@ -63,7 +63,7 @@ Esta mejora completa la administración de columnas desde la interfaz y evita de
 ### BF-002: Mejora visual del tablero
 
 - Type: `feature`
-- Status: `active`
+- Status: `done`
 - Priority: `high`
 - Affects: `kanban/src/ui/shared/board.css`, `kanban/src/App.css`, `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/column/ColumnView.jsx`, `kanban/src/ui/task/TaskCard.jsx`
 
@@ -105,6 +105,9 @@ Una mejora visual aumentaría la legibilidad del tablero, facilitaría el escane
 - El drawer de detalle ahora soporta prioridad y labels, y las cards reflejan esa metadata visualmente en el tablero
 - El drawer de detalle ahora soporta subtareas con alta, marcado y eliminación, y las cards muestran progreso resumido de ejecución
 - Se agregaron acciones de exportación JSON/CSV desde el board para descargar el estado actual con metadata extendida de tasks
+- Se agregó feedback tipo toast para acciones relevantes y undo inmediato para eliminaciones de tasks o columnas
+- Se agregó una primera command palette con atajo `⌘K`/`Ctrl+K`, búsqueda de acciones globales y apertura rápida de detalles de tasks
+- La command palette ahora permite navegar resultados con flechas y ejecutar el comando activo con Enter
 
 **Impact analysis available**
 
@@ -112,12 +115,18 @@ Una mejora visual aumentaría la legibilidad del tablero, facilitaría el escane
 - El análisis funcional y técnico quedó documentado en [docs/bf-002-impact-analysis.md](bf-002-impact-analysis.md)
 - BF-002 deja de ser solo visual: la propuesta introduce nuevas capacidades funcionales y exige reestructurar el frontend para desacoplar dominio, casos de uso y presentación
 
+**Closure review**
+
+- La identidad visual principal ya fue reemplazada por un shell moderno con hero, métricas, tarjetas elevadas y estados consistentes
+- El board ya incluye detalle de task, labels, prioridad, subtareas, exportación, toasts y command palette, por lo que el rediseño dejó de ser solo cosmético y quedó materializado en la UI actual
+- La validación reciente mantiene `npm test` y `npm run build` pasando sobre la implementación activa
+
 ---
 
 ### BF-003: Soporte responsive
 
 - Type: `feature`
-- Status: `active`
+- Status: `done`
 - Priority: `high`
 - Affects: `kanban/src/ui/shared/board.css`, `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/column/ColumnView.jsx`
 
@@ -154,6 +163,12 @@ Actualmente el tablero está pensado principalmente para pantallas amplias. Un c
 - `kanban/src/ui/shared/board.css` ahora soporta scroll horizontal controlado para columnas en pantallas intermedias y compactas
 - Las acciones de task dejan de depender solo de `hover` en dispositivos táctiles o viewports reducidos
 - Inputs, botones, stats y cards ajustan su layout en breakpoints pequeños para evitar overflow accidental
+
+**Closure review**
+
+- El tablero responde hoy con layouts adaptativos, scroll horizontal de columnas y densidad reducida en pantallas pequeñas
+- Los controles principales del board, drawer, modal y toast ya contemplan breakpoints compactos
+- BF-003 puede darse por cumplido para la iteración actual, aunque futuras mejoras visuales podrían seguir refinando mobile
 
 ---
 
@@ -268,9 +283,11 @@ La propuesta visual ya no es solamente un ajuste cosmético. Introduce detalle d
 - `kanban/src/App.js` ya consume `kanban/src/ui/board/BoardPage.jsx` como nueva entrada de UI
 - Se migraron columna y tarea a `kanban/src/ui/column/ColumnView.jsx` y `kanban/src/ui/task/TaskCard.jsx`
 - La regla de story points quedó centralizada en `kanban/src/domain/services/storyPoints.js`
+- Se agregaron servicios de dominio para metadata de task y subtareas
 - Los estilos compartidos del board pasaron a `kanban/src/ui/shared/board.css`
 - El board dejó de pasar un objeto genérico `taskFunctions` y ahora usa handlers explícitos de tarea
 - Se eliminaron los wrappers temporales de `kanban/src/component/`
+- Se sumaron adapters y casos de uso para exportación, además de nuevas superficies de UI como drawer, toast y command palette
 - La suite de tests y el build siguen pasando tras esta primera etapa
 
 **Proposed acceptance criteria**
@@ -287,3 +304,9 @@ La propuesta visual ya no es solamente un ajuste cosmético. Introduce detalle d
 - BF-005 habilita implementar BF-002 y BF-003 con menor acoplamiento
 - Se adoptó la estructura simplificada `Option A` documentada en [docs/bf-002-impact-analysis.md](bf-002-impact-analysis.md)
 - La estructura base ya fue creada en `kanban/src/` para iniciar la migración por etapas
+
+**Remaining gaps to close BF-005**
+
+- La suite de tests sigue concentrada principalmente en [kanban/src/App.test.js](../kanban/src/App.test.js) y aún no se redistribuye por dominio/aplicación/presentación
+- No existe todavía un modelo explícito de `Label` ni un agregado `Board` completo más allá de helpers y estructuras normalizadas
+- El manejo de notificaciones funciona desde el view model, pero todavía no está desacoplado en un adapter o servicio específico dentro de `infrastructure/notifications/`

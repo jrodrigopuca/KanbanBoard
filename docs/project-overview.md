@@ -16,7 +16,7 @@
 
 KanbanBoard es una aplicación web de tablero Kanban construida con React. Permite a los usuarios gestionar tareas organizadas en columnas personalizables, con funcionalidad de arrastrar y soltar (drag & drop) para mover tareas entre columnas y reordenarlas. Los datos se persisten en el `localStorage` del navegador.
 
-La aplicación soporta crear y eliminar tareas, editar títulos, asignar puntos de estimación (usando la secuencia de Fibonacci: 1, 2, 3, 5, 8, 13, 21) y agregar columnas personalizadas. Cada tarea registra la fecha de su última modificación.
+La aplicación soporta crear y eliminar tareas, editar títulos, asignar puntos de estimación (usando la secuencia de Fibonacci: 1, 2, 3, 5, 8, 13, 21) y agregar columnas personalizadas. Cada tarea registra la fecha de su última modificación. Sobre esa base, la UI actual ya incorpora detalle lateral de tarea, labels, prioridad, subtareas, exportación JSON/CSV, command palette y toasts con undo.
 
 La base actual del frontend ya empezó a migrarse hacia una estructura simplificada con capas `domain`, `application`, `infrastructure` y `ui`, para preparar el rediseño y nuevas capacidades sin seguir concentrando todo el comportamiento en un único componente.
 
@@ -59,13 +59,15 @@ KanbanBoard/
 
 ## Key Modules
 
-| Módulo         | Responsabilidad                                                            | Ubicación                                  |
-| -------------- | -------------------------------------------------------------------------- | ------------------------------------------ |
-| App            | Componente raíz que renderiza la entrada del board                         | `kanban/src/App.js`                        |
-| BoardPage      | Conecta la UI del tablero con su view model                                | `kanban/src/ui/board/BoardPage.jsx`        |
-| BoardViewModel | Orquesta estado y acciones del tablero                                     | `kanban/src/ui/board/useBoardViewModel.js` |
-| ColumnView     | Renderiza una columna droppable con su lista de tareas                     | `kanban/src/ui/column/ColumnView.jsx`      |
-| TaskCard       | Renderiza una tarjeta de tarea draggable con edición, eliminación y puntos | `kanban/src/ui/task/TaskCard.jsx`          |
+| Módulo           | Responsabilidad                                                 | Ubicación                                  |
+| ---------------- | --------------------------------------------------------------- | ------------------------------------------ |
+| App              | Componente raíz que renderiza la entrada del board              | `kanban/src/App.js`                        |
+| BoardPage        | Conecta la UI del tablero con su view model                     | `kanban/src/ui/board/BoardPage.jsx`        |
+| BoardViewModel   | Orquesta estado y acciones del tablero                          | `kanban/src/ui/board/useBoardViewModel.js` |
+| ColumnView       | Renderiza una columna droppable con su lista de tareas          | `kanban/src/ui/column/ColumnView.jsx`      |
+| TaskCard         | Renderiza una tarjeta de tarea draggable con metadata resumida  | `kanban/src/ui/task/TaskCard.jsx`          |
+| TaskDetailDrawer | Expone edición ampliada de tarea, labels, prioridad y subtareas | `kanban/src/ui/task/TaskDetailDrawer.jsx`  |
+| CommandPalette   | Permite ejecutar acciones rápidas y abrir tareas con teclado    | `kanban/src/ui/board/CommandPalette.jsx`   |
 
 ## Documentation
 

@@ -11,6 +11,7 @@ const BoardPage = () => {
             newTaskInput={viewModel.newTaskInput}
             columnPendingDelete={viewModel.columnPendingDelete}
             selectedTask={viewModel.selectedTask}
+            toast={viewModel.toast}
             setNewColumnInput={viewModel.setNewColumnInput}
             setNewTaskInput={viewModel.setNewTaskInput}
             onUpdateTask={viewModel.handleUpdateTask}
@@ -27,6 +28,8 @@ const BoardPage = () => {
             onCloseTaskDetails={viewModel.handleCloseTaskDetails}
             onExportJson={viewModel.handleExportJson}
             onExportCsv={viewModel.handleExportCsv}
+            onDismissToast={viewModel.handleDismissToast}
+            onUndoToast={viewModel.handleUndoToast}
         />
     );
 };

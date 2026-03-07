@@ -159,6 +159,113 @@ test("exports board data as json and csv", async () => {
     vi.unstubAllGlobals();
 });
 
+test("shows undo toast after deleting a task and restores it", async () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /delete task hello/i }));
+
+    expect(
+        await screen.findByText(/task hello deleted\./i),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/^hello$/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /undo/i }));
+
+    expect(await screen.findByText(/^hello$/i)).toBeInTheDocument();
+    expect(screen.queryByText(/task hello deleted\./i)).not.toBeInTheDocument();
+});
+
+test("opens command palette and runs commands", async () => {
+    const createObjectURL = vi.fn(() => "blob:palette-url");
+    const revokeObjectURL = vi.fn();
+    const BlobMock = vi.fn(function Blob(parts, options) {
+        return {
+            parts,
+            type: options?.type,
+        };
+    });
+    const clickSpy = vi
+        .spyOn(HTMLAnchorElement.prototype, "click")
+        .mockImplementation(() => {});
+
+    vi.stubGlobal("Blob", BlobMock);
+    vi.stubGlobal("URL", {
+        createObjectURL,
+        revokeObjectURL,
+    });
+
+    render(<App />);
+
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+    expect(
+        await screen.findByRole("dialog", { name: /command palette/i }),
+    ).toBeInTheDocument();
+
+    fireEvent.change(
+        screen.getByRole("textbox", { name: /search commands/i }),
+        {
+            target: { value: "export csv" },
+        },
+    );
+    fireEvent.click(
+        screen
+            .getAllByRole("button")
+            .find((button) =>
+                /export board as csv/i.test(button.textContent || ""),
+            ),
+    );
+
+    expect(
+        await screen.findByText(/board exported as csv\./i),
+    ).toBeInTheDocument();
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+    fireEvent.change(
+        screen.getByRole("textbox", { name: /search commands/i }),
+        {
+            target: { value: "open task: hello" },
+        },
+    );
+    fireEvent.click(
+        screen
+            .getAllByRole("button")
+            .find((button) =>
+                /open task: hello/i.test(button.textContent || ""),
+            ),
+    );
+
+    expect(
+        await screen.findByRole("dialog", { name: /hello/i }),
+    ).toBeInTheDocument();
+
+    clickSpy.mockRestore();
+    vi.unstubAllGlobals();
+});
+
+test("navigates command palette with arrow keys and enter", async () => {
+    render(<App />);
+
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+    const searchInput = await screen.findByRole("textbox", {
+        name: /search commands/i,
+    });
+
+    fireEvent.change(searchInput, {
+        target: { value: "focus" },
+    });
+
+    fireEvent.keyDown(searchInput, { key: "ArrowDown" });
+    fireEvent.keyDown(searchInput, { key: "Enter" });
+
+    expect(screen.getByPlaceholderText(/new column/i)).toHaveFocus();
+    expect(
+        screen.queryByRole("dialog", { name: /command palette/i }),
+    ).not.toBeInTheDocument();
+});
+
 test("renames a column from the column actions", async () => {
     render(<App />);
 

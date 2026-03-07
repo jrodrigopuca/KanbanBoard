@@ -36,6 +36,7 @@ export const useBoardViewModel = () => {
     const [newTaskInput, setNewTaskInput] = useState("");
     const [columnPendingDelete, setColumnPendingDelete] = useState(null);
     const [selectedTaskId, setSelectedTaskId] = useState(null);
+    const [toast, setToast] = useState(null);
 
     useEffect(() => {
         saveBoard({
@@ -54,13 +55,32 @@ export const useBoardViewModel = () => {
         );
     };
 
+    const showToast = ({ message, previousColumns = null }) => {
+        setToast({
+            id: Date.now(),
+            message,
+            previousColumns,
+        });
+    };
+
     const handleDeleteTask = (taskId) => {
-        setColumns((currentColumns) =>
+        const taskToDelete = columns
+            .flatMap((column) => column.tasks)
+            .find((task) => task.id === taskId);
+
+        setColumns(
             deleteTask({
-                columns: currentColumns,
+                columns,
                 taskId,
             }),
         );
+
+        if (taskToDelete) {
+            showToast({
+                message: `Task ${taskToDelete.title} deleted.`,
+                previousColumns: columns,
+            });
+        }
 
         if (selectedTaskId === taskId) {
             setSelectedTaskId(null);
@@ -145,19 +165,31 @@ export const useBoardViewModel = () => {
             return;
         }
 
-        setColumns((currentColumns) =>
+        const deletedColumn = columns.find(
+            (column) => column.id === columnPendingDelete.id,
+        );
+
+        setColumns(
             deleteColumn({
-                columns: currentColumns,
+                columns,
                 columnId: columnPendingDelete.id,
             }),
         );
         setColumnPendingDelete(null);
+
+        if (deletedColumn) {
+            showToast({
+                message: `Column ${deletedColumn.title} deleted.`,
+                previousColumns: columns,
+            });
+        }
     };
 
     const handleRestoreDefaultBoard = () => {
         setColumns(createInitialColumns());
         setColumnPendingDelete(null);
         setSelectedTaskId(null);
+        setToast(null);
     };
 
     const handleOpenTaskDetails = (taskId) => {
@@ -174,6 +206,10 @@ export const useBoardViewModel = () => {
             fileName: "kanban-board.json",
             mimeType: "application/json;charset=utf-8",
         });
+
+        showToast({
+            message: "Board exported as JSON.",
+        });
     };
 
     const handleExportCsv = () => {
@@ -182,6 +218,24 @@ export const useBoardViewModel = () => {
             fileName: "kanban-board.csv",
             mimeType: "text/csv;charset=utf-8",
         });
+
+        showToast({
+            message: "Board exported as CSV.",
+        });
+    };
+
+    const handleDismissToast = () => {
+        setToast(null);
+    };
+
+    const handleUndoToast = () => {
+        if (!toast?.previousColumns) {
+            setToast(null);
+            return;
+        }
+
+        setColumns(toast.previousColumns);
+        setToast(null);
     };
 
     const selectedTask = columns
@@ -200,6 +254,7 @@ export const useBoardViewModel = () => {
         newTaskInput,
         columnPendingDelete,
         selectedTask,
+        toast,
         setNewColumnInput,
         setNewTaskInput,
         handleUpdateTask,
@@ -216,5 +271,7 @@ export const useBoardViewModel = () => {
         handleCloseTaskDetails,
         handleExportJson,
         handleExportCsv,
+        handleDismissToast,
+        handleUndoToast,
     };
 };

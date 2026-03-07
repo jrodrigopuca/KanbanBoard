@@ -14,12 +14,35 @@ export const createDefaultColumns = ({ createId, now = () => Date.now() }) => {
                     title: "Hello",
                     date: timestamp,
                     points: 1,
+                    priority: "high",
+                    labels: ["UI", "Planning"],
+                    subtasks: [
+                        {
+                            id: createId(),
+                            title: "Review visual layout",
+                            completed: true,
+                        },
+                        {
+                            id: createId(),
+                            title: "Refine interactions",
+                            completed: false,
+                        },
+                    ],
                 }),
                 createTaskModel({
                     id: createId(),
                     title: "World",
                     date: timestamp,
                     points: 1,
+                    priority: "medium",
+                    labels: ["Backend"],
+                    subtasks: [
+                        {
+                            id: createId(),
+                            title: "Prepare endpoint contract",
+                            completed: false,
+                        },
+                    ],
                 }),
             ],
         }),

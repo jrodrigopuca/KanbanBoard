@@ -3,6 +3,10 @@ import { createColumn } from "../../application/use-cases/createColumn";
 import { createTask } from "../../application/use-cases/createTask";
 import { deleteColumn } from "../../application/use-cases/deleteColumn";
 import { deleteTask } from "../../application/use-cases/deleteTask";
+import {
+    exportBoardAsCsv,
+    exportBoardAsJson,
+} from "../../application/use-cases/exportBoard";
 import { loadBoard } from "../../application/use-cases/loadBoard";
 import { moveTask } from "../../application/use-cases/moveTask";
 import { renameColumn } from "../../application/use-cases/renameColumn";
@@ -10,6 +14,7 @@ import { saveBoard } from "../../application/use-cases/saveBoard";
 import { updateTask } from "../../application/use-cases/updateTask";
 import { createDefaultColumns } from "../../domain/models/board";
 import { createBrowserId } from "../../domain/services/idGenerator";
+import { triggerFileDownload } from "../../infrastructure/export/downloadFile";
 import { createLocalStorageBoardRepository } from "../../infrastructure/persistence/localStorageBoardRepository";
 
 const boardRepository = createLocalStorageBoardRepository({
@@ -30,6 +35,7 @@ export const useBoardViewModel = () => {
     const [newColumnInput, setNewColumnInput] = useState("");
     const [newTaskInput, setNewTaskInput] = useState("");
     const [columnPendingDelete, setColumnPendingDelete] = useState(null);
+    const [selectedTaskId, setSelectedTaskId] = useState(null);
 
     useEffect(() => {
         saveBoard({
@@ -55,6 +61,10 @@ export const useBoardViewModel = () => {
                 taskId,
             }),
         );
+
+        if (selectedTaskId === taskId) {
+            setSelectedTaskId(null);
+        }
     };
 
     const handleDragEnd = (result) => {
@@ -144,11 +154,52 @@ export const useBoardViewModel = () => {
         setColumnPendingDelete(null);
     };
 
+    const handleRestoreDefaultBoard = () => {
+        setColumns(createInitialColumns());
+        setColumnPendingDelete(null);
+        setSelectedTaskId(null);
+    };
+
+    const handleOpenTaskDetails = (taskId) => {
+        setSelectedTaskId(taskId);
+    };
+
+    const handleCloseTaskDetails = () => {
+        setSelectedTaskId(null);
+    };
+
+    const handleExportJson = () => {
+        triggerFileDownload({
+            content: exportBoardAsJson({ columns }),
+            fileName: "kanban-board.json",
+            mimeType: "application/json;charset=utf-8",
+        });
+    };
+
+    const handleExportCsv = () => {
+        triggerFileDownload({
+            content: exportBoardAsCsv({ columns }),
+            fileName: "kanban-board.csv",
+            mimeType: "text/csv;charset=utf-8",
+        });
+    };
+
+    const selectedTask = columns
+        .flatMap((column) =>
+            column.tasks.map((task) => ({
+                ...task,
+                columnId: column.id,
+                columnTitle: column.title,
+            })),
+        )
+        .find((task) => task.id === selectedTaskId);
+
     return {
         columns,
         newColumnInput,
         newTaskInput,
         columnPendingDelete,
+        selectedTask,
         setNewColumnInput,
         setNewTaskInput,
         handleUpdateTask,
@@ -160,5 +211,10 @@ export const useBoardViewModel = () => {
         handleRequestDeleteColumn,
         handleCloseDeleteModal,
         handleConfirmDeleteColumn,
+        handleRestoreDefaultBoard,
+        handleOpenTaskDetails,
+        handleCloseTaskDetails,
+        handleExportJson,
+        handleExportCsv,
     };
 };

@@ -9,6 +9,7 @@ const ColumnView = ({
     tasks,
     onUpdateTask,
     onDeleteTask,
+    onOpenTaskDetails,
     onRenameColumn,
     onDeleteColumn,
     canDeleteColumn,
@@ -74,30 +75,43 @@ const ColumnView = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="column-title-row">
-                        <h2>
-                            {title} ({tasks.length})
-                        </h2>
-                        <div className="column-actions">
-                            <button
-                                aria-label={`Edit column ${title}`}
-                                className="action-button"
-                                onClick={() => setIsEditingTitle(true)}
-                                type="button"
-                            >
-                                ✏️
-                            </button>
-                            <button
-                                aria-label={`Delete column ${title}`}
-                                className="action-button danger-button"
-                                disabled={!canDeleteColumn}
-                                onClick={() => onDeleteColumn(id)}
-                                type="button"
-                            >
-                                🗑️
-                            </button>
+                    <>
+                        <div className="column-meta-row">
+                            <span className="column-chip">Workflow</span>
+                            <span className="column-count-badge">
+                                {tasks.length} {tasks.length === 1 ? "card" : "cards"}
+                            </span>
                         </div>
-                    </div>
+                        <div className="column-title-row">
+                            <h2>
+                                {title} ({tasks.length})
+                            </h2>
+                            <div className="column-actions">
+                                <button
+                                    aria-label={`Edit column ${title}`}
+                                    className="action-button subtle-button"
+                                    onClick={() => setIsEditingTitle(true)}
+                                    type="button"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    aria-label={`Delete column ${title}`}
+                                    className="action-button danger-button"
+                                    disabled={!canDeleteColumn}
+                                    onClick={() => onDeleteColumn(id)}
+                                    type="button"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                        <p className="column-summary">
+                            {tasks.length > 0
+                                ? "Keep cards moving across the workflow."
+                                : "No cards yet. Add one to get this lane started."}
+                        </p>
+                    </>
                 )}
             </div>
             <Droppable droppableId={id}>
@@ -116,6 +130,7 @@ const ColumnView = ({
                                 indexTask={index}
                                 onDelete={onDeleteTask}
                                 onEdit={onUpdateTask}
+                                onOpenDetails={onOpenTaskDetails}
                             />
                         ))}
                         {provided.placeholder}

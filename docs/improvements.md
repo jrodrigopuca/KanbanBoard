@@ -94,6 +94,18 @@ Una mejora visual aumentaría la legibilidad del tablero, facilitaría el escane
 - Conviene definir primero un sistema simple de tokens visuales antes de rehacer componentes
 - Puede ser útil separar estilos base, layout y estados interactivos para facilitar mantenimiento
 
+**Progress so far**
+
+- Se creó una primera base visual nueva sobre `kanban/src/ui/shared/board.css` con tokens de color, superficies, estados y elevación
+- `kanban/src/ui/board/BoardView.jsx` ahora presenta un shell más claro con hero superior, métricas rápidas y formularios integrados al layout
+- `kanban/src/ui/column/ColumnView.jsx` mejoró jerarquía visual en encabezados y badges de contexto
+- `kanban/src/ui/task/TaskCard.jsx` separa mejor metadata, acciones y puntos de historia para acercarse a un patrón más tipo GitHub Projects / JIRA
+- Se agregó un empty state real para tableros sin columnas y para workflows sin cards, con recuperación del tablero base desde la UI
+- Se incorporó un primer drawer de detalle para tasks con edición de título, descripción y story points desde una vista lateral
+- El drawer de detalle ahora soporta prioridad y labels, y las cards reflejan esa metadata visualmente en el tablero
+- El drawer de detalle ahora soporta subtareas con alta, marcado y eliminación, y las cards muestran progreso resumido de ejecución
+- Se agregaron acciones de exportación JSON/CSV desde el board para descargar el estado actual con metadata extendida de tasks
+
 **Impact analysis available**
 
 - Se revisó la propuesta visual en [design/lista.md](../design/lista.md)
@@ -105,7 +117,7 @@ Una mejora visual aumentaría la legibilidad del tablero, facilitaría el escane
 ### BF-003: Soporte responsive
 
 - Type: `feature`
-- Status: `candidate`
+- Status: `active`
 - Priority: `high`
 - Affects: `kanban/src/ui/shared/board.css`, `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/column/ColumnView.jsx`
 
@@ -135,6 +147,13 @@ Actualmente el tablero está pensado principalmente para pantallas amplias. Un c
 
 - Hace falta decidir si en mobile conviene scroll horizontal por columnas o layout apilado vertical
 - También conviene revisar áreas táctiles mínimas para botones y acciones
+
+**Progress so far**
+
+- Se agregó una región específica para el tablero en `kanban/src/ui/board/BoardView.jsx` con contexto visual y hint de interacción
+- `kanban/src/ui/shared/board.css` ahora soporta scroll horizontal controlado para columnas en pantallas intermedias y compactas
+- Las acciones de task dejan de depender solo de `hover` en dispositivos táctiles o viewports reducidos
+- Inputs, botones, stats y cards ajustan su layout en breakpoints pequeños para evitar overflow accidental
 
 ---
 

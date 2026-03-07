@@ -18,6 +18,7 @@ export const createTask = ({
         title: nextTitle,
         date: now(),
         points: getDefaultStoryPoints(),
+        subtasks: [],
     });
 
     return columns.map((column, index) =>

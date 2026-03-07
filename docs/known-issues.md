@@ -37,7 +37,7 @@ El test heredado de Create React App fue reemplazado por pruebas alineadas con l
 
 - `kanban/src/App.test.js` — contiene pruebas para el render del tablero y para recuperación ante datos persistidos inválidos
 - `kanban/src/App.js` — sigue renderizando `<Board />`, ahora cubierto por pruebas acordes a la aplicación
-- Validación manual: `CI=true npm test -- --watch=false` ejecutado con resultado exitoso
+- Validación manual: `npm test` ejecutado con resultado exitoso tras migrar a Vitest
 
 ---
 
@@ -95,18 +95,18 @@ El renderizado de tareas ahora asigna una prop `key` explícita basada en `task.
 
 ### KI-006: StrictMode de React deshabilitado
 
-- Status: `accepted`
+- Status: `resolved`
 - Category: `tooling`
 - Affects: `kanban/src/index.js`
 
 **Summary**
 
-`React.StrictMode` fue removido del entry point. Esto es una solución al conflicto conocido entre `react-beautiful-dnd` y el doble renderizado de StrictMode en React 18. Como consecuencia, se pierden las advertencias de desarrollo que StrictMode proporciona.
+`React.StrictMode` fue reactivado tras migrar el drag & drop a `@hello-pangea/dnd` y actualizar el stack principal. Con ello se recuperan las verificaciones adicionales de desarrollo sin romper el build ni la suite de tests actual.
 
 **Evidence**
 
-- `kanban/src/index.js` — renderiza `<App />` directamente sin `<React.StrictMode>`
-- `kanban/package.json` — usa `react-beautiful-dnd ^13.1.1` que tiene issues documentados con StrictMode en React 18
+- `kanban/src/index.js` — vuelve a renderizar `<App />` dentro de `<React.StrictMode>`
+- Validación manual: `npm test` y `npm run build` ejecutados con resultado exitoso tras migrar a Vite
 
 ---
 
@@ -149,7 +149,7 @@ La edición y eliminación de columnas ya se implementó como mejora del tablero
 - `kanban/src/component/Column.jsx` — iteración de tareas sin key
 - `kanban/src/component/Task.jsx` — componente de tarea
 - `kanban/src/App.test.js` — test roto
-- `kanban/src/index.js` — StrictMode ausente
+- `kanban/src/index.js` — StrictMode reactivado
 - `kanban/package.json` — dependencias y homepage
 - `kanban/.gitignore` — exclusión de artefactos de build
 - `docs/architecture.md` — constraints y trade-offs identificados

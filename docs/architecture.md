@@ -8,7 +8,7 @@
 
 ## Confidence Note
 
-- **Confirmed** from repository evidence: estructura de componentes, flujo de datos, persistencia en localStorage, uso de react-beautiful-dnd
+- **Confirmed** from repository evidence: estructura de componentes, flujo de datos, persistencia en localStorage, uso de @hello-pangea/dnd
 - **Inferred** from code patterns: modelo de datos implícito en el estado del componente Board
 - **Needs confirmation**: no se encontró configuración de despliegue ni infraestructura
 
@@ -20,19 +20,20 @@ KanbanBoard sigue una arquitectura de **Single Page Application (SPA)** del lado
 
 - Pattern: SPA del lado del cliente (client-side monolith)
 - Complexity: simple
-- Rationale: un solo punto de entrada (`index.js`), un solo componente con estado (`Board`), sin backend, sin API, sin base de datos externa. Todo el estado y la lógica de negocio residen en el componente Board.
+- Rationale: un punto de entrada HTML de Vite (`index.html`), un bootstrap React (`index.js`), un solo componente con estado (`Board`), sin backend, sin API y sin base de datos externa. Todo el estado y la lógica de negocio residen en el componente Board.
 
 ## Components
 
 ```mermaid
 graph TB
     subgraph Browser
-        Index[index.js<br>Bootstrap de React] --> App[App.js<br>Componente raíz]
+        Html[index.html<br>Entrada Vite] --> Index[index.js<br>Bootstrap de React]
+        Index --> App[App.js<br>Componente raíz]
         App --> Board[Board.jsx<br>Estado y lógica principal]
         Board --> Column[Column.jsx<br>Columna droppable]
         Column --> Task[Task.jsx<br>Tarjeta draggable]
         Board <-->|lee/escribe| LS[(localStorage<br>Persistencia)]
-        Board -.->|DragDropContext| DND[react-beautiful-dnd]
+        Board -.->|DragDropContext| DND[@hello-pangea/dnd]
         Column -.->|Droppable| DND
         Task -.->|Draggable| DND
     end
@@ -40,13 +41,14 @@ graph TB
 
 ### Descripción de componentes
 
-| Componente | Tipo                 | Responsabilidad                                                                        |
-| ---------- | -------------------- | -------------------------------------------------------------------------------------- |
-| `index.js` | Entry point          | Monta `<App />` en el DOM                                                              |
-| `App`      | Presentacional       | Envuelve `Board` con estructura HTML base                                              |
-| `Board`    | Container (stateful) | Gestiona estado de columnas/tareas, CRUD, drag & drop, sincronización con localStorage |
-| `Column`   | Presentacional       | Renderiza una columna como zona `Droppable`, muestra título y contador de tareas       |
-| `Task`     | Stateful (local)     | Renderiza tarjeta `Draggable` con edición inline, eliminación y puntos de estimación   |
+| Componente   | Tipo                 | Responsabilidad                                                                        |
+| ------------ | -------------------- | -------------------------------------------------------------------------------------- |
+| `index.html` | Entry point          | Define el contenedor raíz y carga el módulo principal vía Vite                         |
+| `index.js`   | Entry point          | Monta `<App />` en el DOM                                                              |
+| `App`        | Presentacional       | Envuelve `Board` con estructura HTML base                                              |
+| `Board`      | Container (stateful) | Gestiona estado de columnas/tareas, CRUD, drag & drop, sincronización con localStorage |
+| `Column`     | Presentacional       | Renderiza una columna como zona `Droppable`, muestra título y contador de tareas       |
+| `Task`       | Stateful (local)     | Renderiza tarjeta `Draggable` con edición inline, eliminación y puntos de estimación   |
 
 ### Flujo de datos
 
@@ -66,7 +68,7 @@ El flujo de datos sigue un patrón **unidireccional de arriba hacia abajo**:
 sequenceDiagram
     participant U as Usuario
     participant B as Board
-    participant DND as react-beautiful-dnd
+    participant DND as @hello-pangea/dnd
     participant LS as localStorage
 
     U->>DND: Arrastra tarea de columna A
@@ -96,21 +98,20 @@ sequenceDiagram
 
 ## Cross-Cutting Concerns
 
-| Concern           | Enfoque                                                                                 |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| Persistencia      | `localStorage` — serialización JSON automática en cada cambio de estado via `useEffect` |
-| Generación de IDs | `uuid` v4 — IDs únicos para columnas y tareas                                           |
-| Estilos           | CSS con variables custom (CSS custom properties) en `:root`, tema oscuro                |
-| Error handling    | No hay manejo explícito de errores (ej. localStorage lleno, JSON inválido)              |
-| Testing           | Jest + React Testing Library — un test de ejemplo presente                              |
+| Concern           | Enfoque                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| Persistencia      | `localStorage` — serialización JSON automática en cada cambio de estado via `useEffect`     |
+| Generación de IDs | `crypto.randomUUID()` con fallback simple — IDs únicos para columnas y tareas               |
+| Estilos           | CSS con variables custom (CSS custom properties) en `:root`, tema oscuro                    |
+| Error handling    | No hay manejo explícito de errores (ej. localStorage lleno, JSON inválido)                  |
+| Testing           | Vitest + React Testing Library — cobertura básica de render, fallback y gestión de columnas |
 
 ## Constraints and Trade-offs
 
 - **Sin backend**: toda la persistencia depende de `localStorage`, lo que limita el almacenamiento a ~5-10 MB por origen y no permite sincronización entre dispositivos o usuarios
 - **Sin autenticación**: la aplicación es de uso local/individual, sin gestión de usuarios
-- **react-beautiful-dnd** está en modo de mantenimiento (no recibe nuevas features), pero funciona correctamente para este caso de uso
+- **@hello-pangea/dnd** mantiene la API del enfoque anterior y reduce el riesgo de depender de una librería archivada
 - **Estado centralizado en Board**: toda la lógica de estado reside en un solo componente, lo cual es adecuado para la complejidad actual pero podría requerir refactorización si la app crece significativamente
-- **Build incluido en el repo**: la carpeta `build/` está commiteada, lo cual no es una práctica común pero es funcional para despliegues estáticos
 
 ## Sources Inspected
 
@@ -118,6 +119,7 @@ sequenceDiagram
 - `kanban/src/component/Column.jsx` — estructura de columna droppable
 - `kanban/src/component/Task.jsx` — estructura de tarea draggable y lógica de edición
 - `kanban/src/App.js` — componente raíz
+- `kanban/index.html` — entrada HTML de Vite
 - `kanban/src/index.js` — punto de entrada
 - `kanban/src/component/styles.css` — sistema de diseño con CSS custom properties
 - `kanban/package.json` — dependencias y stack tecnológico

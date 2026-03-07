@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import { Draggable } from "react-beautiful-dnd";
+import { Draggable } from "@hello-pangea/dnd";
 import "./styles.css";
 
 const TaskComponent = ({ id, title, date, points, indexTask, onEdit, onDelete }) => {

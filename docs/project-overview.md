@@ -23,13 +23,13 @@ La aplicación soporta crear y eliminar tareas, editar títulos, asignar puntos 
 | Capa          | Tecnología                             |
 | ------------- | -------------------------------------- |
 | Lenguaje      | JavaScript (JSX)                       |
-| Framework     | React 18.2                             |
-| Build Tool    | Create React App (react-scripts 5.0.1) |
-| Drag & Drop   | react-beautiful-dnd 13.1.1             |
-| ID Generation | uuid 9.0.1                             |
+| Framework     | React 19.2.4                           |
+| Build Tool    | Vite 7.3.1                             |
+| Drag & Drop   | @hello-pangea/dnd 18.0.1               |
+| ID Generation | Web Crypto API (`crypto.randomUUID`)   |
 | Persistencia  | localStorage (navegador)               |
-| Testing       | Jest + React Testing Library           |
-| Linting       | ESLint (configuración react-app)       |
+| Testing       | Vitest + React Testing Library         |
+| Linting       | No hay tarea dedicada configurada      |
 
 ## Repository Structure
 
@@ -37,8 +37,8 @@ La aplicación soporta crear y eliminar tareas, editar títulos, asignar puntos 
 KanbanBoard/
 ├── kanban/                  ← aplicación React
 │   ├── package.json         ← dependencias y scripts
-│   ├── public/              ← assets estáticos y HTML base
-│   │   └── index.html       ← punto de entrada HTML
+│   ├── index.html           ← punto de entrada HTML de Vite
+│   ├── public/              ← assets estáticos públicos
 │   ├── src/                 ← código fuente
 │   │   ├── index.js         ← bootstrap de React
 │   │   ├── App.js           ← componente raíz
@@ -82,5 +82,5 @@ KanbanBoard/
 - `kanban/src/component/Column.jsx` — componente de columna
 - `kanban/src/component/Task.jsx` — componente de tarea
 - `kanban/src/component/styles.css` — estilos de los componentes
-- `kanban/public/index.html` — HTML base de la aplicación
+- `kanban/index.html` — HTML base de la aplicación
 - `README.md` — README del repositorio

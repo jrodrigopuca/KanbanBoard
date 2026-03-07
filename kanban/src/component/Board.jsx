@@ -1,32 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { DragDropContext } from "react-beautiful-dnd";
-import { v4 as uuidv4 } from "uuid";
+import { DragDropContext } from "@hello-pangea/dnd";
 import ColumnComponent from "./Column";
 import "./styles.css";
 
 const STORAGE_KEY = "localColumns";
+const createId = () =>
+  window.crypto?.randomUUID?.() ??
+  `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const createDefaultColumns = () => [
   {
-    id: uuidv4(),
+    id: createId(),
     title: "TO DO",
     tasks: [
-      { id: uuidv4(), title: "Hello", date: Date.now(), points: 1 },
-      { id: uuidv4(), title: "World", date: Date.now(), points: 1 },
+      { id: createId(), title: "Hello", date: Date.now(), points: 1 },
+      { id: createId(), title: "World", date: Date.now(), points: 1 },
     ],
   },
   {
-    id: uuidv4(),
+    id: createId(),
     title: "PROGRESS",
     tasks: [],
   },
   {
-    id: uuidv4(),
+    id: createId(),
     title: "TEST",
     tasks: [],
   },
   {
-    id: uuidv4(),
+    id: createId(),
     title: "DONE",
     tasks: [],
   },
@@ -139,7 +141,7 @@ const Board = () => {
       return;
     }
 
-    const newTask = { title, id: uuidv4(), date: Date.now(), points: 1 };
+    const newTask = { title, id: createId(), date: Date.now(), points: 1 };
 
     setColumns((currentColumns) =>
       currentColumns.map((column, index) =>
@@ -158,7 +160,7 @@ const Board = () => {
       return;
     }
 
-    const newColumn = { title, id: uuidv4(), tasks: [] };
+    const newColumn = { title, id: createId(), tasks: [] };
 
     setColumns((currentColumns) => [...currentColumns, newColumn]);
     setNewColumnInput("");

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%">
+  <defs>
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.8"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="#050505" />
+
+  <text x="80" y="60" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="bold">ProjectFlow</text>
+  <line x1="0" y1="90" x2="1200" y2="90" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+
+  <g transform="translate(80, 140)">
+    
+    <g transform="translate(0, 0)">
+      <text x="0" y="0" fill="#888888" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" letter-spacing="1">IDEAS</text>
+      <rect x="55" y="-12" width="20" height="16" rx="8" fill="#141414" stroke="rgba(255,255,255,0.08)" />
+      <text x="65" y="0" fill="#888888" font-family="system-ui, -apple-system, sans-serif" font-size="10" text-anchor="middle">2</text>
+      
+      <g transform="translate(0, 30)">
+        <rect width="320" height="60" rx="8" fill="#111111" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+        <circle cx="20" cy="30" r="4" fill="#E2B93B" />
+        <text x="35" y="35" fill="#EEEEEE" font-family="system-ui, -apple-system, sans-serif" font-size="14">Ajustar paleta de colores</text>
+      </g>
+    </g>
+
+    <g transform="translate(360, 0)">
+      <text x="0" y="0" fill="#888888" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" letter-spacing="1">HACIENDO</text>
+      <g transform="translate(0, 30)">
+        <rect width="320" height="60" rx="8" fill="#111111" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+        <circle cx="20" cy="30" r="4" fill="#F85149" />
+        <text x="35" y="35" fill="#EEEEEE" font-family="system-ui, -apple-system, sans-serif" font-size="14">Crear componente DuePill</text>
+      </g>
+    </g>
+
+    <g transform="translate(720, 0)">
+      
+      <text x="0" y="0" fill="#EEEEEE" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" letter-spacing="1">HECHO</text>
+      <rect x="55" y="-12" width="20" height="16" rx="8" fill="#1A1A1A" stroke="rgba(255,255,255,0.15)" />
+      <text x="65" y="0" fill="#EEEEEE" font-family="system-ui, -apple-system, sans-serif" font-size="10" text-anchor="middle">1</text>
+
+      <rect x="290" y="-14" width="30" height="20" rx="4" fill="#1A1A1A" stroke="rgba(255,255,255,0.1)" />
+      <text x="305" y="0" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="14" text-anchor="middle" font-weight="bold">···</text>
+
+      <g transform="translate(0, 30)">
+        <rect width="320" height="60" rx="8" fill="#0A0A0A" stroke="rgba(255,255,255,0.04)" stroke-width="1" />
+        <text x="20" y="35" fill="#777777" font-family="system-ui, -apple-system, sans-serif" font-size="14" text-decoration="line-through">Bocetos isotipo El Chañi</text>
+      </g>
+
+      <g transform="translate(140, 12)" filter="url(#dropShadow)">
+        <rect width="180" height="116" rx="8" fill="#161B22" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+        
+        <rect x="4" y="4" width="172" height="32" rx="4" fill="rgba(255,255,255,0.05)" />
+        <text x="16" y="25" fill="#EEEEEE" font-family="system-ui, -apple-system, sans-serif" font-size="13">Renombrar columna</text>
+        
+        <text x="16" y="57" fill="#AAAAAA" font-family="system-ui, -apple-system, sans-serif" font-size="13">Vaciar tareas</text>
+
+        <line x1="4" y1="74" x2="176" y2="74" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+
+        <text x="16" y="98" fill="#F85149" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500">Eliminar columna</text>
+      </g>
+
+    </g>
+  </g>
+</svg>

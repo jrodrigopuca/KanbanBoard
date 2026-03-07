@@ -148,9 +148,9 @@ La edición y eliminación de columnas ya se implementó como mejora del tablero
 - `kanban/src/component/Board.jsx` — lógica de estado, mutaciones, persistencia
 - `kanban/src/component/Column.jsx` — iteración de tareas sin key
 - `kanban/src/component/Task.jsx` — componente de tarea
-- `kanban/src/App.test.js` — test roto
+- `kanban/src/App.test.js` — suite de pruebas actualizada
 - `kanban/src/index.js` — StrictMode reactivado
-- `kanban/package.json` — dependencias y homepage
+- `kanban/package.json` — dependencias y scripts actuales
 - `kanban/.gitignore` — exclusión de artefactos de build
 - `docs/architecture.md` — constraints y trade-offs identificados
 - `docs/development-guide.md` — problemas comunes documentados

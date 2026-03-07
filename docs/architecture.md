@@ -98,13 +98,13 @@ sequenceDiagram
 
 ## Cross-Cutting Concerns
 
-| Concern           | Enfoque                                                                                     |
-| ----------------- | ------------------------------------------------------------------------------------------- |
-| Persistencia      | `localStorage` — serialización JSON automática en cada cambio de estado via `useEffect`     |
-| Generación de IDs | `crypto.randomUUID()` con fallback simple — IDs únicos para columnas y tareas               |
-| Estilos           | CSS con variables custom (CSS custom properties) en `:root`, tema oscuro                    |
-| Error handling    | No hay manejo explícito de errores (ej. localStorage lleno, JSON inválido)                  |
-| Testing           | Vitest + React Testing Library — cobertura básica de render, fallback y gestión de columnas |
+| Concern           | Enfoque                                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------------------- |
+| Persistencia      | `localStorage` — serialización JSON automática en cada cambio de estado via `useEffect`             |
+| Generación de IDs | `crypto.randomUUID()` con fallback simple — IDs únicos para columnas y tareas                       |
+| Estilos           | CSS con variables custom (CSS custom properties) en `:root`, tema oscuro                            |
+| Error handling    | Manejo básico con `try/catch` en lectura/escritura de `localStorage`; no hay capa global de errores |
+| Testing           | Vitest + React Testing Library — cobertura básica de render, fallback y gestión de columnas         |
 
 ## Constraints and Trade-offs
 

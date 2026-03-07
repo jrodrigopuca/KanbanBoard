@@ -32,12 +32,7 @@ npm install
 
 No se encontró archivo `.env` ni `.env.example` en el repositorio. La aplicación no requiere variables de entorno para funcionar localmente.
 
-| Variable   | Descripción                       | Requerida | Default    |
-| ---------- | --------------------------------- | --------- | ---------- |
-| `PORT`     | Puerto del servidor de desarrollo | No        | `3000`     |
-| `BASE_URL` | URL base para producción          | No        | `/kanban/` |
-
-> **Inferred**: la base de despliegue se define en `vite.config.js` y afecta las rutas del build de producción.
+> **Inferred**: el puerto de desarrollo y la base de despliegue se definen en [kanban/vite.config.js](kanban/vite.config.js).
 
 ## Running Locally
 
@@ -93,7 +88,7 @@ El build de producción se genera en `kanban/build/`. Los archivos se minifican 
 
 | Problema                                    | Solución                                                                                                                                                                                                                        |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm start` falla con error de puerto       | El puerto 3000 está ocupado. Usar `PORT=3001 npm start` o cerrar el proceso que ocupa el puerto                                                                                                                                 |
+| `npm start` falla con error de puerto       | El puerto 3000 está ocupado. Usar `npm start -- --port 3001`, `npm run dev -- --port 3001` o cerrar el proceso que ocupa el puerto                                                                                              |
 | Los datos del tablero no aparecen           | Verificar `localStorage` en DevTools → Application → Local Storage. Los datos se almacenan bajo la clave `localColumns`                                                                                                         |
 | Un test falla tras cambiar persistencia     | Limpiar `localStorage` o actualizar la expectativa del test para reflejar el estado inicial y el manejo de datos persistidos                                                                                                    |
 | `npm audit` reporta nuevas vulnerabilidades | Revisar primero la cadena reportada antes de aplicar fixes automáticos. Tras la migración a Vite, la auditoría actual del proyecto queda en `0` vulnerabilidades, por lo que cualquier aviso nuevo debe tratarse como regresión |
@@ -102,7 +97,7 @@ El build de producción se genera en `kanban/build/`. Los archivos se minifican 
 
 - `kanban/package.json` — scripts y dependencias
 - `kanban/src/index.js` — bootstrap de React con `StrictMode`
-- `kanban/src/App.test.js` — test de ejemplo
+- `kanban/src/App.test.js` — suite de pruebas de interfaz
 - `kanban/index.html` — HTML base y título de la aplicación
 - `kanban/vite.config.js` — configuración de Vite y Vitest
 - `kanban/README.md` — README del proyecto

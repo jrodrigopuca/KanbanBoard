@@ -9,7 +9,7 @@
 ## Confidence Note
 
 - **Confirmed** from repository evidence: stack tecnológico, estructura de componentes, funcionalidades de CRUD y drag & drop, persistencia en localStorage
-- **Inferred** from repository structure: homepage de despliegue (`https://yardev.net/kanban` en `package.json`)
+- **Inferred** from repository structure: despliegue bajo la base `/kanban/` definida en [kanban/vite.config.js](kanban/vite.config.js)
 - **Needs confirmation**: no se encontró configuración de CI/CD ni de despliegue
 
 ## Summary
@@ -44,7 +44,7 @@ KanbanBoard/
 │   │   ├── App.js           ← componente raíz
 │   │   ├── App.css          ← estilos del componente raíz
 │   │   ├── index.css        ← estilos globales
-│   │   ├── App.test.js      ← test de ejemplo
+│   │   ├── App.test.js      ← suite de pruebas de interfaz
 │   │   └── component/       ← componentes del tablero
 │   │       ├── Board.jsx    ← tablero principal
 │   │       ├── Column.jsx   ← columna droppable

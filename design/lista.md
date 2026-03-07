@@ -5,3 +5,6 @@
 005.svg: Ver detalle de una task
 006.svg: Drag & Drop
 007.svg: Paleta de Comandos
+008.svg: Empty State (sin columnas, sin cards)
+009.svg: Asignar Story Points
+010.svg: Responsive

@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%">
+  <defs>
+    <filter id="modalShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="15" stdDeviation="25" flood-color="#000000" flood-opacity="0.85"/>
+    </filter>
+    <linearGradient id="activeBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#58A6FF" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#316DCA" stop-opacity="0.8"/>
+    </linearGradient>
+    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="#050505" />
+  
+  <g opacity="0.3">
+    <text x="80" y="60" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="bold">ProjectFlow</text>
+    <rect x="80" y="140" width="300" height="110" rx="8" fill="#111111" stroke="rgba(255,255,255,0.05)" />
+    <rect x="400" y="140" width="300" height="110" rx="8" fill="#111111" stroke="rgba(255,255,255,0.05)" />
+  </g>
+  
+  <rect width="1200" height="800" fill="#000000" fill-opacity="0.65" />
+
+  <g transform="translate(350, 200)" filter="url(#modalShadow)">
+    <rect width="500" height="420" rx="16" fill="#0D1117" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+    
+    <text x="32" y="45" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="600">Exportar Tablero</text>
+    <text x="32" y="70" fill="#888888" font-family="system-ui, -apple-system, sans-serif" font-size="14">Descarga una copia de tus tareas, columnas y configuraciones.</text>
+    
+    <rect x="444" y="24" width="32" height="32" rx="8" fill="transparent" />
+    <text x="460" y="46" fill="#666666" font-family="system-ui, -apple-system, sans-serif" font-size="20" text-anchor="middle">×</text>
+
+    <line x1="0" y1="95" x2="500" y2="95" stroke="rgba(255,255,255,0.06)" stroke-width="1" />
+
+    <g transform="translate(32, 125)">
+      
+      <rect width="436" height="85" rx="10" fill="rgba(88,166,255,0.05)" stroke="url(#activeBorder)" stroke-width="1.5" filter="url(#glow)" />
+      
+      <rect x="16" y="22" width="40" height="40" rx="8" fill="rgba(88,166,255,0.15)" />
+      <text x="36" y="47" fill="#58A6FF" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">{ }</text>
+      
+      <text x="72" y="40" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="600">Respaldo Completo (JSON)</text>
+      <text x="72" y="60" fill="#AAAAAA" font-family="system-ui, -apple-system, sans-serif" font-size="13">Ideal para desarrolladores. Mantiene la estructura exacta.</text>
+      
+      <circle cx="406" cy="42" r="10" fill="#58A6FF" />
+      <circle cx="406" cy="42" r="4" fill="#0D1117" />
+
+      <g transform="translate(0, 100)">
+        <rect width="436" height="85" rx="10" fill="#141414" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+        
+        <rect x="16" y="22" width="40" height="40" rx="8" fill="#1A1A1A" stroke="rgba(255,255,255,0.05)" />
+        <rect x="24" y="30" width="24" height="24" rx="2" fill="transparent" stroke="#888888" stroke-width="1.5" />
+        <line x1="24" y1="38" x2="48" y2="38" stroke="#888888" stroke-width="1.5" />
+        <line x1="24" y1="46" x2="48" y2="46" stroke="#888888" stroke-width="1.5" />
+        <line x1="36" y1="30" x2="36" y2="54" stroke="#888888" stroke-width="1.5" />
+
+        <text x="72" y="40" fill="#EEEEEE" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="500">Formato de Tabla (CSV)</text>
+        <text x="72" y="60" fill="#777777" font-family="system-ui, -apple-system, sans-serif" font-size="13">Exporta tareas planas. Perfecto para pasar a Google Sheets.</text>
+
+        <circle cx="406" cy="42" r="10" fill="transparent" stroke="#555555" stroke-width="1.5" />
+      </g>
+    </g>
+
+    <line x1="0" y1="340" x2="500" y2="340" stroke="rgba(255,255,255,0.06)" stroke-width="1" />
+
+    <g transform="translate(0, 340)">
+      <text x="32" y="45" fill="#666666" font-family="system-ui, -apple-system, sans-serif" font-size="12">Tamaño estimado: 24 KB</text>
+
+      <rect x="250" y="20" width="90" height="40" rx="6" fill="transparent" stroke="rgba(255,255,255,0.1)" />
+      <text x="295" y="45" fill="#EEEEEE" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="500" text-anchor="middle">Cancelar</text>
+
+      <rect x="352" y="20" width="116" height="40" rx="6" fill="#EEEEEE" />
+      <text x="410" y="45" fill="#050505" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Descargar</text>
+    </g>
+
+  </g>
+</svg>

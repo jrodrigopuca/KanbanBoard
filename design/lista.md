@@ -8,3 +8,5 @@
 008.svg: Empty State (sin columnas, sin cards)
 009.svg: Asignar Story Points
 010.svg: Responsive
+011.svg: Exportar datos
+012.svg: Notificaciones (toast)

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%">
+  <defs>
+    <filter id="toastShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.8"/>
+    </filter>
+    <filter id="bgToastShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="#050505" />
+  
+  <g opacity="0.4">
+    <text x="80" y="60" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="bold">ProjectFlow</text>
+    <line x1="0" y1="90" x2="1200" y2="90" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+    
+    <g transform="translate(800, 140)">
+      <text x="0" y="0" fill="#555555" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" letter-spacing="1">HECHO</text>
+      <rect width="320" height="90" y="30" rx="8" fill="#0A0A0A" stroke="rgba(255,255,255,0.04)" stroke-width="1" />
+      <rect width="320" height="90" y="135" rx="8" fill="#0A0A0A" stroke="rgba(255,255,255,0.04)" stroke-width="1" />
+      <rect width="320" height="90" y="240" rx="8" fill="#0A0A0A" stroke="rgba(255,255,255,0.04)" stroke-width="1" />
+    </g>
+  </g>
+
+  <g transform="translate(760, 500)">
+    
+    <g transform="translate(15, 30)" opacity="0.5" filter="url(#bgToastShadow)">
+      <rect width="370" height="48" rx="10" fill="#111111" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+      
+      <circle cx="24" cy="24" r="10" fill="#888888" fill-opacity="0.15" />
+      <text x="24" y="29" fill="#888888" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">i</text>
+      
+      <text x="45" y="29" fill="#AAAAAA" font-family="system-ui, -apple-system, sans-serif" font-size="14">Enlace de tarea copiado al portapapeles.</text>
+    </g>
+
+    <g transform="translate(10, 90)" opacity="0.85" filter="url(#bgToastShadow)">
+      <rect width="380" height="48" rx="10" fill="#141414" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+      
+      <circle cx="24" cy="24" r="10" fill="#3FB950" fill-opacity="0.15" />
+      <path d="M 20 24 L 23 27 L 29 20" fill="transparent" stroke="#3FB950" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      
+      <text x="45" y="29" fill="#DDDDDD" font-family="system-ui, -apple-system, sans-serif" font-size="14">Exportación JSON completada.</text>
+      
+      <text x="315" y="29" fill="#58A6FF" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500">Abrir</text>
+    </g>
+
+    <g transform="translate(0, 150)" filter="url(#toastShadow)">
+      <rect width="400" height="52" rx="10" fill="#1A1F26" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      
+      <rect x="0" y="50" width="280" height="2" fill="#58A6FF" opacity="0.5" />
+
+      <circle cx="26" cy="26" r="11" fill="#F85149" fill-opacity="0.15" />
+      <path d="M 22 23 L 30 23 M 24 23 L 24 31 M 28 23 L 28 31 M 25 20 L 27 20" stroke="#F85149" stroke-width="1.5" stroke-linecap="round" fill="transparent" />
+      
+      <text x="48" y="31" fill="#EEEEEE" font-family="system-ui, -apple-system, sans-serif" font-size="14">Tarea <tspan fill="#FFFFFF" font-weight="600">"DuePill"</tspan> eliminada.</text>
+      
+      <rect x="255" y="14" width="85" height="24" rx="4" fill="rgba(88,166,255,0.1)" stroke="rgba(88,166,255,0.2)" stroke-width="1" cursor="pointer" />
+      <text x="297" y="30" fill="#58A6FF" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" text-anchor="middle" cursor="pointer">Deshacer</text>
+      
+      <rect x="350" y="16" width="34" height="20" rx="4" fill="rgba(255,255,255,0.06)" />
+      <text x="367" y="29" fill="#888888" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" text-anchor="middle">⌘ Z</text>
+    </g>
+
+  </g>
+</svg>

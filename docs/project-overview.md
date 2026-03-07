@@ -18,6 +18,8 @@ KanbanBoard es una aplicación web de tablero Kanban construida con React. Permi
 
 La aplicación soporta crear y eliminar tareas, editar títulos, asignar puntos de estimación (usando la secuencia de Fibonacci: 1, 2, 3, 5, 8, 13, 21) y agregar columnas personalizadas. Cada tarea registra la fecha de su última modificación.
 
+La base actual del frontend ya empezó a migrarse hacia una estructura simplificada con capas `domain`, `application`, `infrastructure` y `ui`, para preparar el rediseño y nuevas capacidades sin seguir concentrando todo el comportamiento en un único componente.
+
 ## Tech Stack
 
 | Capa          | Tecnología                           |
@@ -45,11 +47,10 @@ KanbanBoard/
 │   │   ├── App.css          ← estilos del componente raíz
 │   │   ├── index.css        ← estilos globales
 │   │   ├── App.test.js      ← suite de pruebas de interfaz
-│   │   └── component/       ← componentes del tablero
-│   │       ├── Board.jsx    ← tablero principal
-│   │       ├── Column.jsx   ← columna droppable
-│   │       ├── Task.jsx     ← tarjeta de tarea draggable
-│   │       └── styles.css   ← estilos de componentes
+│   │   ├── domain/          ← modelos y reglas de dominio
+│   │   ├── application/     ← casos de uso
+│   │   ├── infrastructure/  ← persistencia y adapters
+│   │   └── ui/              ← componentes y view models
 │   └── build/               ← build de producción
 ├── docs/                    ← documentación del proyecto
 ├── README.md                ← README del repositorio
@@ -58,12 +59,13 @@ KanbanBoard/
 
 ## Key Modules
 
-| Módulo | Responsabilidad                                                            | Ubicación                         |
-| ------ | -------------------------------------------------------------------------- | --------------------------------- |
-| App    | Componente raíz que renderiza el Board                                     | `kanban/src/App.js`               |
-| Board  | Estado del tablero, CRUD de tareas/columnas, drag & drop, persistencia     | `kanban/src/component/Board.jsx`  |
-| Column | Renderiza una columna droppable con su lista de tareas                     | `kanban/src/component/Column.jsx` |
-| Task   | Renderiza una tarjeta de tarea draggable con edición, eliminación y puntos | `kanban/src/component/Task.jsx`   |
+| Módulo         | Responsabilidad                                                            | Ubicación                                  |
+| -------------- | -------------------------------------------------------------------------- | ------------------------------------------ |
+| App            | Componente raíz que renderiza la entrada del board                         | `kanban/src/App.js`                        |
+| BoardPage      | Conecta la UI del tablero con su view model                                | `kanban/src/ui/board/BoardPage.jsx`        |
+| BoardViewModel | Orquesta estado y acciones del tablero                                     | `kanban/src/ui/board/useBoardViewModel.js` |
+| ColumnView     | Renderiza una columna droppable con su lista de tareas                     | `kanban/src/ui/column/ColumnView.jsx`      |
+| TaskCard       | Renderiza una tarjeta de tarea draggable con edición, eliminación y puntos | `kanban/src/ui/task/TaskCard.jsx`          |
 
 ## Documentation
 
@@ -78,9 +80,10 @@ KanbanBoard/
 - `kanban/package.json` — dependencias, scripts y configuración del proyecto
 - `kanban/src/App.js` — componente raíz
 - `kanban/src/index.js` — punto de entrada de React
-- `kanban/src/component/Board.jsx` — lógica principal del tablero
-- `kanban/src/component/Column.jsx` — componente de columna
-- `kanban/src/component/Task.jsx` — componente de tarea
-- `kanban/src/component/styles.css` — estilos de los componentes
+- `kanban/src/ui/board/BoardPage.jsx` — entrada de la UI del tablero
+- `kanban/src/ui/board/useBoardViewModel.js` — estado y acciones del tablero
+- `kanban/src/ui/column/ColumnView.jsx` — componente de columna
+- `kanban/src/ui/task/TaskCard.jsx` — componente de tarea
+- `kanban/src/ui/shared/board.css` — estilos compartidos del tablero
 - `kanban/index.html` — HTML base de la aplicación
 - `README.md` — README del repositorio

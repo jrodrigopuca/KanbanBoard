@@ -128,7 +128,7 @@ button:disabled{
 
 .form-board{
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;
   padding: 10px;
   margin: 10px 10px;
 }

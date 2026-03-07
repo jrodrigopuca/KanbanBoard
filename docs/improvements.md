@@ -23,7 +23,7 @@
 - Type: `feature`
 - Status: `done`
 - Priority: `medium`
-- Affects: `kanban/src/component/Board.jsx`, `kanban/src/component/Column.jsx`
+- Affects: `kanban/src/ui/board/useBoardViewModel.js`, `kanban/src/ui/column/ColumnView.jsx`
 
 **Summary**
 
@@ -35,8 +35,8 @@ Esta mejora completa la administración de columnas desde la interfaz y evita de
 
 **Current evidence**
 
-- `kanban/src/component/Board.jsx` — existe `handleAddColumn`, pero no hay `handleDeleteColumn` ni `handleEditColumn`
-- `kanban/src/component/Column.jsx` — la UI actual renderiza el título de la columna sin acciones de administración
+- `kanban/src/ui/board/useBoardViewModel.js` — expone handlers de creación, renombre y eliminación de columnas
+- `kanban/src/ui/column/ColumnView.jsx` — la UI actual renderiza el título y acciones de administración
 
 **Implemented behavior**
 
@@ -63,9 +63,9 @@ Esta mejora completa la administración de columnas desde la interfaz y evita de
 ### BF-002: Mejora visual del tablero
 
 - Type: `feature`
-- Status: `candidate`
+- Status: `active`
 - Priority: `high`
-- Affects: `kanban/src/component/styles.css`, `kanban/src/App.css`, `kanban/src/component/Board.jsx`, `kanban/src/component/Column.jsx`, `kanban/src/component/Task.jsx`
+- Affects: `kanban/src/ui/shared/board.css`, `kanban/src/App.css`, `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/column/ColumnView.jsx`, `kanban/src/ui/task/TaskCard.jsx`
 
 **Summary**
 
@@ -77,9 +77,9 @@ Una mejora visual aumentaría la legibilidad del tablero, facilitaría el escane
 
 **Current evidence**
 
-- `kanban/src/component/styles.css` — el layout y la paleta actual son funcionales, pero todavía básicos y con poco énfasis visual entre columna, card, metadata y acciones
-- `kanban/src/component/Task.jsx` — la tarjeta concentra fecha, puntos y acciones en un espacio reducido, sin estados visuales avanzados
-- `kanban/src/component/Column.jsx` — el encabezado de columna muestra información mínima y todavía no incorpora elementos visuales comparables a tableros modernos
+- `kanban/src/ui/shared/board.css` — el layout y la paleta actual son funcionales, pero todavía básicos y con poco énfasis visual entre columna, card, metadata y acciones
+- `kanban/src/ui/task/TaskCard.jsx` — la tarjeta concentra fecha, puntos y acciones en un espacio reducido, sin estados visuales avanzados
+- `kanban/src/ui/column/ColumnView.jsx` — el encabezado de columna muestra información mínima y todavía no incorpora elementos visuales comparables a tableros modernos
 
 **Possible acceptance criteria**
 
@@ -94,6 +94,12 @@ Una mejora visual aumentaría la legibilidad del tablero, facilitaría el escane
 - Conviene definir primero un sistema simple de tokens visuales antes de rehacer componentes
 - Puede ser útil separar estilos base, layout y estados interactivos para facilitar mantenimiento
 
+**Impact analysis available**
+
+- Se revisó la propuesta visual en [design/lista.md](../design/lista.md)
+- El análisis funcional y técnico quedó documentado en [docs/bf-002-impact-analysis.md](bf-002-impact-analysis.md)
+- BF-002 deja de ser solo visual: la propuesta introduce nuevas capacidades funcionales y exige reestructurar el frontend para desacoplar dominio, casos de uso y presentación
+
 ---
 
 ### BF-003: Soporte responsive
@@ -101,7 +107,7 @@ Una mejora visual aumentaría la legibilidad del tablero, facilitaría el escane
 - Type: `feature`
 - Status: `candidate`
 - Priority: `high`
-- Affects: `kanban/src/component/styles.css`, `kanban/src/component/Board.jsx`, `kanban/src/component/Column.jsx`
+- Affects: `kanban/src/ui/shared/board.css`, `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/column/ColumnView.jsx`
 
 **Summary**
 
@@ -113,9 +119,9 @@ Actualmente el tablero está pensado principalmente para pantallas amplias. Un c
 
 **Current evidence**
 
-- `kanban/src/component/styles.css` — `.kanban-board` usa `display: flex` sin reglas responsive ni wrap condicional
-- `kanban/src/component/styles.css` — `.column` depende de `flex: 1` y `min-width: 200px`, lo que puede forzar desbordes en pantallas angostas
-- `kanban/src/component/styles.css` — los formularios y controles usan anchos fijos o proporcionales sin breakpoints dedicados
+- `kanban/src/ui/shared/board.css` — `.kanban-board` usa `display: flex` sin reglas responsive ni wrap condicional
+- `kanban/src/ui/shared/board.css` — `.column` depende de `flex: 1` y `min-width: 200px`, lo que puede forzar desbordes en pantallas angostas
+- `kanban/src/ui/shared/board.css` — los formularios y controles usan anchos fijos o proporcionales sin breakpoints dedicados
 
 **Possible acceptance criteria**
 
@@ -202,9 +208,63 @@ El proyecto depende de versiones específicas de Create React App y de librería
 ## Sources Inspected
 
 - `docs/known-issues.md` — origen del BF-001 como backlog funcional
-- `kanban/src/component/Board.jsx` — manejo actual de columnas
-- `kanban/src/component/Column.jsx` — render actual de la UI de columnas
+- `kanban/src/ui/board/useBoardViewModel.js` — manejo actual de columnas
+- `kanban/src/ui/column/ColumnView.jsx` — render actual de la UI de columnas
 - `kanban/src/App.test.js` — cobertura de renombre y eliminación con confirmación
-- `kanban/src/component/styles.css` — layout visual actual y limitaciones responsive
-- `kanban/src/component/Task.jsx` — estructura visual actual de las tarjetas
+- `kanban/src/ui/shared/board.css` — layout visual actual y limitaciones responsive
+- `kanban/src/ui/task/TaskCard.jsx` — estructura visual actual de las tarjetas
 - `kanban/package.json` — dependencias actuales y tooling base
+
+---
+
+### BF-005: Refactor a Clean Architecture y SOLID
+
+- Type: `technical-improvement`
+- Status: `active`
+- Priority: `high`
+- Affects: `kanban/src/`
+
+**Summary**
+
+Reorganizar el frontend para separar reglas de negocio, casos de uso, adapters de persistencia y componentes de UI. El objetivo es soportar el rediseño de BF-002 sin seguir concentrando toda la lógica en `Board.jsx`.
+
+**Why it matters**
+
+La propuesta visual ya no es solamente un ajuste cosmético. Introduce detalle de tareas, labels, subtareas, exportación, toasts, command palette y estados vacíos, por lo que conviene desacoplar responsabilidades antes de ampliar más la UI.
+
+**Current evidence**
+
+- `kanban/src/ui/board/useBoardViewModel.js` concentra la orquestación actual del tablero mientras la migración sigue en progreso
+- `kanban/src/ui/column/ColumnView.jsx` encapsula la edición inline y acciones de columna
+- `kanban/src/ui/task/TaskCard.jsx` concentra interacción local de edición y cambio de story points
+
+**Progress so far**
+
+- Se creó la estructura base `Option A` en `kanban/src/`
+- Se extrajo la persistencia a `kanban/src/infrastructure/persistence/localStorageBoardRepository.js`
+- Se extrajeron casos de uso iniciales a `kanban/src/application/use-cases/`
+- Se movieron los modelos iniciales a `kanban/src/domain/models/`
+- Se creó `kanban/src/ui/board/useBoardViewModel.js` para desacoplar estado y acciones de la vista
+- Se creó `kanban/src/ui/board/BoardView.jsx` como capa de presentación del board
+- `kanban/src/App.js` ya consume `kanban/src/ui/board/BoardPage.jsx` como nueva entrada de UI
+- Se migraron columna y tarea a `kanban/src/ui/column/ColumnView.jsx` y `kanban/src/ui/task/TaskCard.jsx`
+- La regla de story points quedó centralizada en `kanban/src/domain/services/storyPoints.js`
+- Los estilos compartidos del board pasaron a `kanban/src/ui/shared/board.css`
+- El board dejó de pasar un objeto genérico `taskFunctions` y ahora usa handlers explícitos de tarea
+- Se eliminaron los wrappers temporales de `kanban/src/component/`
+- La suite de tests y el build siguen pasando tras esta primera etapa
+
+**Proposed acceptance criteria**
+
+- Se definen entidades y modelos de dominio (`Board`, `Column`, `Task`, `Subtask`, `Label`)
+- Los casos de uso se separan de la capa de presentación
+- La persistencia en `localStorage` queda detrás de un repositorio o gateway
+- La UI consume view models o hooks de aplicación en lugar de mutar estado de dominio directamente
+- La suite de tests se redistribuye entre dominio, aplicación y presentación
+
+**Notes**
+
+- La primera etapa debe priorizar estructura y contratos, sin intentar resolver todas las pantallas nuevas en el mismo cambio
+- BF-005 habilita implementar BF-002 y BF-003 con menor acoplamiento
+- Se adoptó la estructura simplificada `Option A` documentada en [docs/bf-002-impact-analysis.md](bf-002-impact-analysis.md)
+- La estructura base ya fue creada en `kanban/src/` para iniciar la migración por etapas

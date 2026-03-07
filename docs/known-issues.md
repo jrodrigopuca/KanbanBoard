@@ -45,7 +45,7 @@ El test heredado de Create React App fue reemplazado por pruebas alineadas con l
 
 - Status: `resolved`
 - Category: `architecture`
-- Affects: `kanban/src/component/Board.jsx`
+- Affects: `kanban/src/application/use-cases/loadBoard.js`, `kanban/src/application/use-cases/saveBoard.js`, `kanban/src/infrastructure/persistence/localStorageBoardRepository.js`
 
 **Summary**
 
@@ -53,8 +53,9 @@ La inicialización y persistencia del tablero ahora envuelven el acceso a `local
 
 **Evidence**
 
-- `kanban/src/component/Board.jsx` — `initColumns()` protege `getItem()` y `JSON.parse()` con `try/catch` y vuelve a `createDefaultColumns()` cuando falla la carga
-- `kanban/src/component/Board.jsx` — el `useEffect` protege `localStorage.setItem()` con `try/catch`
+- `kanban/src/application/use-cases/loadBoard.js` — protege la carga del repositorio y vuelve a `createDefaultColumns()` cuando falla la lectura
+- `kanban/src/application/use-cases/saveBoard.js` — protege la persistencia y registra errores de guardado
+- `kanban/src/infrastructure/persistence/localStorageBoardRepository.js` — encapsula el acceso a `localStorage`
 - `kanban/src/App.test.js` — hay una prueba explícita para JSON inválido en `localStorage`
 
 ---
@@ -63,7 +64,7 @@ La inicialización y persistencia del tablero ahora envuelven el acceso a `local
 
 - Status: `resolved`
 - Category: `architecture`
-- Affects: `kanban/src/component/Board.jsx`
+- Affects: `kanban/src/application/use-cases/moveTask.js`, `kanban/src/application/use-cases/createTask.js`, `kanban/src/application/use-cases/createColumn.js`
 
 **Summary**
 
@@ -71,9 +72,9 @@ Los handlers principales del tablero ahora crean nuevas referencias para columna
 
 **Evidence**
 
-- `kanban/src/component/Board.jsx` — `handleDragEnd` clona cada columna y su array `tasks` antes de usar `splice()` sobre copias seguras
-- `kanban/src/component/Board.jsx` — `handleAddTask` usa `setColumns()` funcional y crea un nuevo array `tasks` con spread
-- `kanban/src/component/Board.jsx` — `handleAddColumn` también fue ajustado a actualización funcional para mantener consistencia
+- `kanban/src/application/use-cases/moveTask.js` — clona cada columna y su array `tasks` antes de reordenar elementos
+- `kanban/src/application/use-cases/createTask.js` — devuelve nuevas referencias para insertar tareas sin mutar estado previo
+- `kanban/src/application/use-cases/createColumn.js` — agrega columnas mediante nuevos arrays
 
 ---
 
@@ -81,7 +82,7 @@ Los handlers principales del tablero ahora crean nuevas referencias para columna
 
 - Status: `resolved`
 - Category: `architecture`
-- Affects: `kanban/src/component/Column.jsx`
+- Affects: `kanban/src/ui/column/ColumnView.jsx`
 
 **Summary**
 
@@ -89,7 +90,7 @@ El renderizado de tareas ahora asigna una prop `key` explícita basada en `task.
 
 **Evidence**
 
-- `kanban/src/component/Column.jsx` — `tasks.map(...)` ahora renderiza `<TaskComponent key={task.id} ... />`
+- `kanban/src/ui/column/ColumnView.jsx` — `tasks.map(...)` renderiza `<TaskCard key={task.id} ... />`
 
 ---
 
@@ -131,7 +132,7 @@ La carpeta `build/` no debe versionarse. El proyecto ya incluye la regla `/build
 
 - Type: `feature`
 - Status: `done`
-- Affects: `kanban/src/component/Board.jsx`
+- Affects: `kanban/src/ui/board/useBoardViewModel.js`, `kanban/src/ui/column/ColumnView.jsx`
 
 **Summary**
 
@@ -139,15 +140,15 @@ La edición y eliminación de columnas ya se implementó como mejora del tablero
 
 **Evidence**
 
-- `kanban/src/component/Board.jsx` — existen handlers para renombrar columnas, solicitar eliminación y confirmar mediante modal
-- `kanban/src/component/Column.jsx` — cada columna expone acciones para editar y eliminar
+- `kanban/src/ui/board/useBoardViewModel.js` — existen handlers para renombrar columnas, solicitar eliminación y confirmar mediante modal
+- `kanban/src/ui/column/ColumnView.jsx` — cada columna expone acciones para editar y eliminar
 - `kanban/src/App.test.js` — hay cobertura para renombrado y borrado con confirmación
 
 ## Sources Inspected
 
-- `kanban/src/component/Board.jsx` — lógica de estado, mutaciones, persistencia
-- `kanban/src/component/Column.jsx` — iteración de tareas sin key
-- `kanban/src/component/Task.jsx` — componente de tarea
+- `kanban/src/ui/board/useBoardViewModel.js` — lógica de estado, mutaciones, persistencia
+- `kanban/src/ui/column/ColumnView.jsx` — iteración de tareas con key
+- `kanban/src/ui/task/TaskCard.jsx` — componente de tarea
 - `kanban/src/App.test.js` — suite de pruebas actualizada
 - `kanban/src/index.js` — StrictMode reactivado
 - `kanban/package.json` — dependencias y scripts actuales

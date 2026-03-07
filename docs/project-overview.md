@@ -20,16 +20,16 @@ La aplicación soporta crear y eliminar tareas, editar títulos, asignar puntos 
 
 ## Tech Stack
 
-| Capa          | Tecnología                             |
-| ------------- | -------------------------------------- |
-| Lenguaje      | JavaScript (JSX)                       |
-| Framework     | React 19.2.4                           |
-| Build Tool    | Vite 7.3.1                             |
-| Drag & Drop   | @hello-pangea/dnd 18.0.1               |
-| ID Generation | Web Crypto API (`crypto.randomUUID`)   |
-| Persistencia  | localStorage (navegador)               |
-| Testing       | Vitest + React Testing Library         |
-| Linting       | No hay tarea dedicada configurada      |
+| Capa          | Tecnología                           |
+| ------------- | ------------------------------------ |
+| Lenguaje      | JavaScript (JSX)                     |
+| Framework     | React 19.2.4                         |
+| Build Tool    | Vite 7.3.1                           |
+| Drag & Drop   | @hello-pangea/dnd 18.0.1             |
+| ID Generation | Web Crypto API (`crypto.randomUUID`) |
+| Persistencia  | localStorage (navegador)             |
+| Testing       | Vitest + React Testing Library       |
+| Linting       | No hay tarea dedicada configurada    |
 
 ## Repository Structure
 

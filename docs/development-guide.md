@@ -32,10 +32,10 @@ npm install
 
 No se encontró archivo `.env` ni `.env.example` en el repositorio. La aplicación no requiere variables de entorno para funcionar localmente.
 
-| Variable   | Descripción                       | Requerida | Default                     |
-| ---------- | --------------------------------- | --------- | --------------------------- |
-| `PORT`     | Puerto del servidor de desarrollo | No        | `3000`                      |
-| `BASE_URL` | URL base para producción          | No        | `/kanban/`                  |
+| Variable   | Descripción                       | Requerida | Default    |
+| ---------- | --------------------------------- | --------- | ---------- |
+| `PORT`     | Puerto del servidor de desarrollo | No        | `3000`     |
+| `BASE_URL` | URL base para producción          | No        | `/kanban/` |
 
 > **Inferred**: la base de despliegue se define en `vite.config.js` y afecta las rutas del build de producción.
 
@@ -80,22 +80,22 @@ El build de producción se genera en `kanban/build/`. Los archivos se minifican 
 
 ## Project Scripts
 
-| Script  | Comando         | Descripción                                          |
-| ------- | --------------- | ---------------------------------------------------- |
-| `start` | `npm start`     | Inicia el servidor de desarrollo de Vite en `localhost:3000` |
-| `dev`   | `npm run dev`   | Alias de desarrollo para Vite                        |
-| `build` | `npm run build` | Genera el build de producción en `build/`            |
-| `preview` | `npm run preview` | Sirve el build generado localmente                |
-| `test`  | `npm test`      | Ejecuta los tests con Vitest en modo no interactivo  |
-| `test:watch` | `npm run test:watch` | Ejecuta los tests con Vitest en modo watch |
+| Script       | Comando              | Descripción                                                  |
+| ------------ | -------------------- | ------------------------------------------------------------ |
+| `start`      | `npm start`          | Inicia el servidor de desarrollo de Vite en `localhost:3000` |
+| `dev`        | `npm run dev`        | Alias de desarrollo para Vite                                |
+| `build`      | `npm run build`      | Genera el build de producción en `build/`                    |
+| `preview`    | `npm run preview`    | Sirve el build generado localmente                           |
+| `test`       | `npm test`           | Ejecuta los tests con Vitest en modo no interactivo          |
+| `test:watch` | `npm run test:watch` | Ejecuta los tests con Vitest en modo watch                   |
 
 ## Common Issues
 
-| Problema                                     | Solución                                                                                                                                                                                                                                                                    |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm start` falla con error de puerto        | El puerto 3000 está ocupado. Usar `PORT=3001 npm start` o cerrar el proceso que ocupa el puerto                                                                                                                                                                             |
-| Los datos del tablero no aparecen            | Verificar `localStorage` en DevTools → Application → Local Storage. Los datos se almacenan bajo la clave `localColumns`                                                                                                                                                     |
-| Un test falla tras cambiar persistencia      | Limpiar `localStorage` o actualizar la expectativa del test para reflejar el estado inicial y el manejo de datos persistidos                                                                                                                                                |
+| Problema                                    | Solución                                                                                                                                                                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm start` falla con error de puerto       | El puerto 3000 está ocupado. Usar `PORT=3001 npm start` o cerrar el proceso que ocupa el puerto                                                                                                                                 |
+| Los datos del tablero no aparecen           | Verificar `localStorage` en DevTools → Application → Local Storage. Los datos se almacenan bajo la clave `localColumns`                                                                                                         |
+| Un test falla tras cambiar persistencia     | Limpiar `localStorage` o actualizar la expectativa del test para reflejar el estado inicial y el manejo de datos persistidos                                                                                                    |
 | `npm audit` reporta nuevas vulnerabilidades | Revisar primero la cadena reportada antes de aplicar fixes automáticos. Tras la migración a Vite, la auditoría actual del proyecto queda en `0` vulnerabilidades, por lo que cualquier aviso nuevo debe tratarse como regresión |
 
 ## Sources Inspected

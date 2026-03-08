@@ -1094,6 +1094,56 @@ button:disabled,
   padding-bottom: 2px;
 }
 
+.task-drawer-column-select {
+  appearance: none;
+  min-height: 30px;
+  padding: 4px 28px 4px 10px;
+  border: 1px solid rgba(88, 166, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(88, 166, 255, 0.08) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2358a6ff'/%3E%3C/svg%3E") no-repeat right 10px center;
+  color: var(--accent-blue);
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.task-drawer-column-select:hover,
+.task-drawer-column-select:focus {
+  border-color: rgba(88, 166, 255, 0.42);
+  background-color: rgba(88, 166, 255, 0.14);
+  outline: none;
+}
+
+.task-drawer-column-select option {
+  background: #1a1a1a;
+  color: var(--text-primary);
+}
+
+.task-move-bar {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.task-move-button {
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 46%;
+}
+
 .task-drawer-footer {
   justify-content: flex-end;
 }
@@ -1791,6 +1841,10 @@ button:disabled,
 
   .task {
     border-radius: 14px;
+  }
+
+  .task-move-bar {
+    display: flex;
   }
 
   .task-title {

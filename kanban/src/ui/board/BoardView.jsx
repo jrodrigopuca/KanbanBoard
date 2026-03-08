@@ -31,6 +31,7 @@ const BoardView = ({
     setNewTaskInput,
     onUpdateTask,
     onDeleteTask,
+    onMoveTaskToColumn,
     onDragEnd,
     onAddTask,
     onAddColumn,
@@ -584,9 +585,17 @@ const BoardView = ({
                                             isMobileLayout ? "mobile-focused-board" : ""
                                         }`.trim()}
                                     >
-                                        {columns.map((column) => (
+                                        {columns.map((column, columnIndex) => (
                                             <ColumnView
                                                 {...column}
+                                                adjacentColumns={{
+                                                    prev: columnIndex > 0
+                                                        ? { id: columns[columnIndex - 1].id, title: columns[columnIndex - 1].title }
+                                                        : null,
+                                                    next: columnIndex < columns.length - 1
+                                                        ? { id: columns[columnIndex + 1].id, title: columns[columnIndex + 1].title }
+                                                        : null,
+                                                }}
                                                 className={
                                                     isMobileLayout
                                                         ? column.id === activeMobileColumnId
@@ -597,6 +606,7 @@ const BoardView = ({
                                                 key={column.id}
                                                 onClearColumn={onRequestClearColumn}
                                                 onDeleteColumn={onRequestDeleteColumn}
+                                                onMoveTaskToColumn={onMoveTaskToColumn}
                                                 onRenameColumn={onRenameColumn}
                                                 onOpenTaskDetails={onOpenTaskDetails}
                                                 onUpdateTask={onUpdateTask}
@@ -779,9 +789,11 @@ const BoardView = ({
 
             {selectedTask && (
                 <TaskDetailDrawer
+                    columns={columns}
                     task={selectedTask}
                     onClose={onCloseTaskDetails}
                     onDeleteTask={onDeleteTask}
+                    onMoveTaskToColumn={onMoveTaskToColumn}
                     onSaveTask={onUpdateTask}
                 />
             )}

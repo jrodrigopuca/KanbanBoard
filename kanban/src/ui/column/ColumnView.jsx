@@ -8,8 +8,10 @@ const ColumnView = ({
     title,
     tasks,
     className = "",
+    adjacentColumns = { prev: null, next: null },
     onUpdateTask,
     onDeleteTask,
+    onMoveTaskToColumn,
     onOpenTaskDetails,
     onRenameColumn,
     onDeleteColumn,
@@ -203,8 +205,11 @@ const ColumnView = ({
                                 key={task.id}
                                 {...task}
                                 indexTask={index}
+                                moveLeftColumn={adjacentColumns.prev}
+                                moveRightColumn={adjacentColumns.next}
                                 onDelete={onDeleteTask}
                                 onEdit={onUpdateTask}
+                                onMoveToColumn={onMoveTaskToColumn}
                                 onOpenDetails={onOpenTaskDetails}
                             />
                         ))}

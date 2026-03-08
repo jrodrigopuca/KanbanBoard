@@ -17,6 +17,7 @@ const BoardPage = () => {
             setNewTaskInput={viewModel.setNewTaskInput}
             onUpdateTask={viewModel.handleUpdateTask}
             onDeleteTask={viewModel.handleDeleteTask}
+            onMoveTaskToColumn={viewModel.handleMoveTaskToColumn}
             onDragEnd={viewModel.handleDragEnd}
             onAddTask={viewModel.handleAddTask}
             onAddColumn={viewModel.handleAddColumn}

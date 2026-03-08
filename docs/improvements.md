@@ -551,3 +551,50 @@ Todas las inconsistencias detectadas fueron resueltas excepto H.2 (diferido):
 - **G.1** — Los labels de cierre siguen la convención: "Cancel" en modales con acción pendiente, "Close" en overlays de edición/consulta
 - **H.1** — Se eliminó la regla CSS duplicada de `.toast-card` en el breakpoint 720px
 - La suite de tests y el build siguen pasando tras todos los cambios (`npm test` 15/15, `npm run build` OK)
+
+---
+
+### BF-007: Mover tareas entre columnas en mobile
+
+- Type: `feature`
+- Status: `done`
+- Priority: `critical`
+- Affects: `kanban/src/ui/board/useBoardViewModel.js`, `kanban/src/ui/board/BoardPage.jsx`, `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/column/ColumnView.jsx`, `kanban/src/ui/task/TaskCard.jsx`, `kanban/src/ui/task/TaskDetailDrawer.jsx`, `kanban/src/ui/shared/board.css`
+
+**Summary**
+
+En mobile el tablero muestra una sola columna a la vez, lo que hacía imposible el drag & drop entre columnas. No existía ningún mecanismo alternativo para mover tareas. Se implementaron dos soluciones complementarias: un selector de columna en el drawer de detalle y botones de movimiento rápido en cada card visible solo en mobile.
+
+**Why it matters**
+
+Mover tareas entre columnas es la operación fundamental de un tablero Kanban. Sin ella, la interfaz mobile era funcionalmente incompleta: el usuario podía ver tareas pero no avanzarlas a través del workflow.
+
+**Current evidence (before fix)**
+
+- `kanban/src/ui/board/BoardView.jsx` — el layout mobile (`mobile-focused-board`) oculta todas las columnas excepto la activa con `mobile-column-hidden`, imposibilitando el drag & drop entre columnas
+- `kanban/src/ui/task/TaskDetailDrawer.jsx` — mostraba `task.columnTitle` como chip de solo lectura sin posibilidad de cambiar la columna
+- `kanban/src/ui/task/TaskCard.jsx` — no tenía ningún control para mover la tarea a otra columna
+
+**Implemented behavior**
+
+1. **Selector de columna en el drawer de detalle**: el chip estático de columna fue reemplazado por un `<select>` que lista todas las columnas del tablero. Al cambiar la selección, la tarea se mueve inmediatamente a la columna destino (posición 0).
+
+2. **Botones de movimiento rápido en cards (mobile-only)**: cada tarjeta muestra una barra inferior con botones "← Columna anterior" y "Columna siguiente →" visibles solo en viewports ≤720px. Los botones se omiten cuando no hay columna adyacente en esa dirección.
+
+3. **Handler centralizado `handleMoveTaskToColumn`**: nuevo caso de uso en el view model que localiza la tarea en su columna origen, construye un objeto `result` compatible con `moveTask` y la reubica en la posición 0 de la columna destino.
+
+**Acceptance criteria**
+
+- El usuario puede mover una tarea a cualquier columna desde el drawer de detalle en cualquier viewport
+- El usuario puede mover una tarea a la columna adyacente directamente desde la card en mobile
+- Los botones de movimiento rápido no aparecen en desktop
+- La tarea aparece al inicio de la columna destino tras el movimiento
+- El estado persiste correctamente en `localStorage`
+- El drag & drop en desktop no se ve afectado
+
+**Notes**
+
+- El selector del drawer funciona en todos los viewports, no solo mobile, lo que también mejora la experiencia en tablet
+- Los botones de movimiento rápido usan CSS `display: none` por defecto y `display: flex` dentro de `@media (max-width: 720px)` para evitar lógica JS adicional
+- El handler reutiliza el caso de uso `moveTask` existente construyendo un `result` equivalente al de drag & drop
+- `npm run build` pasa correctamente tras la implementación

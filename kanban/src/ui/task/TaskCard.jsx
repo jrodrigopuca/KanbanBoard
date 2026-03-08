@@ -39,8 +39,11 @@ const TaskCard = ({
     labels,
     subtasks,
     indexTask,
+    moveLeftColumn,
+    moveRightColumn,
     onEdit,
     onDelete,
+    onMoveToColumn,
     onOpenDetails,
 }) => {
     const [isPointsSelectorOpen, setIsPointsSelectorOpen] = useState(false);
@@ -212,6 +215,34 @@ const TaskCard = ({
                             </div>
                         </div>
                     </div>
+                    {(moveLeftColumn || moveRightColumn) && (
+                        <div className="task-move-bar">
+                            {moveLeftColumn ? (
+                                <button
+                                    aria-label={`Move to ${moveLeftColumn.title}`}
+                                    className="action-button subtle-button task-move-button"
+                                    onClick={() => onMoveToColumn(id, moveLeftColumn.id)}
+                                    type="button"
+                                >
+                                    <span aria-hidden="true">←</span> {moveLeftColumn.title}
+                                </button>
+                            ) : (
+                                <span />
+                            )}
+                            {moveRightColumn ? (
+                                <button
+                                    aria-label={`Move to ${moveRightColumn.title}`}
+                                    className="action-button subtle-button task-move-button"
+                                    onClick={() => onMoveToColumn(id, moveRightColumn.id)}
+                                    type="button"
+                                >
+                                    {moveRightColumn.title} <span aria-hidden="true">→</span>
+                                </button>
+                            ) : (
+                                <span />
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
         </Draggable>

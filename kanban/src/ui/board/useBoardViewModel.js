@@ -117,6 +117,37 @@ export const useBoardViewModel = () => {
         }
     };
 
+    const handleMoveTaskToColumn = (taskId, targetColumnId) => {
+        setColumns((currentColumns) => {
+            let sourceColumnId = null;
+            let sourceIndex = -1;
+
+            for (const column of currentColumns) {
+                const taskIndex = column.tasks.findIndex(
+                    (task) => task.id === taskId,
+                );
+
+                if (taskIndex >= 0) {
+                    sourceColumnId = column.id;
+                    sourceIndex = taskIndex;
+                    break;
+                }
+            }
+
+            if (!sourceColumnId || sourceColumnId === targetColumnId) {
+                return currentColumns;
+            }
+
+            return moveTask({
+                columns: currentColumns,
+                result: {
+                    source: { droppableId: sourceColumnId, index: sourceIndex },
+                    destination: { droppableId: targetColumnId, index: 0 },
+                },
+            });
+        });
+    };
+
     const handleDragEnd = (result) => {
         setColumns((currentColumns) =>
             moveTask({
@@ -345,6 +376,7 @@ export const useBoardViewModel = () => {
         setNewTaskInput,
         handleUpdateTask,
         handleDeleteTask,
+        handleMoveTaskToColumn,
         handleDragEnd,
         handleAddTask,
         handleAddColumn,

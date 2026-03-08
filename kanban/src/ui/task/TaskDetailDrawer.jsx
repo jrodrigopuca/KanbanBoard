@@ -13,7 +13,7 @@ import {
 } from "../../domain/services/taskMetadata";
 import { getSubtaskProgress, normalizeSubtasks } from "../../domain/services/subtasks";
 
-const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
+const TaskDetailDrawer = ({ columns, task, onClose, onSaveTask, onDeleteTask, onMoveTaskToColumn }) => {
     const [title, setTitle] = useState(task.title);
     const [description, setDescription] = useState(task.description || "");
     const [priority, setPriority] = useState(
@@ -126,7 +126,18 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                 </div>
 
                 <div className="task-drawer-meta">
-                    <span className="column-chip">{task.columnTitle}</span>
+                    <select
+                        aria-label="Move task to column"
+                        className="task-drawer-column-select"
+                        onChange={(event) => onMoveTaskToColumn(task.id, event.target.value)}
+                        value={task.columnId}
+                    >
+                        {columns.map((column) => (
+                            <option key={column.id} value={column.id}>
+                                {column.title}
+                            </option>
+                        ))}
+                    </select>
                     <span className="task-date task-date-inline">Updated {dateToShow}</span>
                     <span className={`task-priority-badge task-priority-${priority}`}>
                         {getPriorityLabel(priority)}

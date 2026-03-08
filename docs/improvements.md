@@ -310,3 +310,244 @@ La propuesta visual ya no es solamente un ajuste cosmético. Introduce detalle d
 - La suite de tests sigue concentrada principalmente en [kanban/src/App.test.js](../kanban/src/App.test.js) y aún no se redistribuye por dominio/aplicación/presentación
 - No existe todavía un modelo explícito de `Label` ni un agregado `Board` completo más allá de helpers y estructuras normalizadas
 - El manejo de notificaciones funciona desde el view model, pero todavía no está desacoplado en un adapter o servicio específico dentro de `infrastructure/notifications/`
+
+---
+
+### BF-006: Revisión de consistencia UI/UX
+
+- Type: `feature`
+- Status: `done`
+- Priority: `high`
+- Affects: `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/column/ColumnView.jsx`, `kanban/src/ui/task/TaskCard.jsx`, `kanban/src/ui/task/TaskDetailDrawer.jsx`, `kanban/src/ui/board/CommandPalette.jsx`, `kanban/src/ui/shared/board.css`, `kanban/src/ui/board/useBoardViewModel.js`
+
+**Summary**
+
+Revisión completa del frontend que detecta inconsistencias de UI/UX acumuladas tras las iteraciones de BF-001 a BF-005: redundancias visuales, texto en idioma incorrecto, código inalcanzable, patrones de interacción divergentes entre componentes y falta de cierre en menús y notificaciones.
+
+**Why it matters**
+
+Las inconsistencias erosionan la confianza del usuario en la aplicación y aumentan la fricción al interactuar con el tablero. Resolverlas mejoraría la coherencia visual, reduciría confusión y eliminaría código muerto que dificulta el mantenimiento.
+
+**Current evidence**
+
+A continuación se documentan las inconsistencias detectadas, agrupadas por categoría.
+
+---
+
+#### A — Redundancias de información
+
+**A.1 — Conteo de tareas duplicado en el encabezado de columna**
+
+- Archivo: `kanban/src/ui/column/ColumnView.jsx`
+- El encabezado de cada columna muestra el conteo de tareas **dos veces** en la misma zona visual:
+  - En `column-count-badge`: `{tasks.length} {tasks.length === 1 ? "card" : "cards"}`
+  - En el `<h2>` del título: `{title} ({tasks.length})`
+- **Corrección sugerida**: eliminar el conteo del `<h2>` y dejar el badge como fuente única, o viceversa
+
+**A.2 — Chip "Workflow" estático sin valor informativo**
+
+- Archivo: `kanban/src/ui/column/ColumnView.jsx`
+- Cada columna muestra un `<span className="column-chip">Workflow</span>` que siempre dice lo mismo
+- En contraste, el drawer de detalle usa la misma clase `column-chip` para mostrar el nombre real de la columna, lo cual sí aporta contexto
+- **Corrección sugerida**: eliminar el chip estático o reemplazarlo por información variable (tipo de columna, posición en el workflow)
+
+**A.3 — Puntos de acceso redundantes para exportación**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`
+- Existen tres caminos superpuestos para exportar:
+  1. La card de exportación en el toolbar con botón "Open export"
+  2. La command palette ofrece "Export board as JSON", "Export board as CSV" **y** "Open export options"
+  3. La card de exportación además tiene un botón "Open commands" que abre la command palette
+- **Corrección sugerida**: reducir a dos caminos claros (modal de exportación y command palette con acciones directas), eliminar el botón "Open commands" de la card de exportación
+
+---
+
+#### B — Mezcla de idiomas
+
+**B.1 — Placeholders en español dentro de una UI en inglés**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`
+- El input del compositor de tareas tiene placeholder `"Configurar entorno de"` (español, además truncado)
+- El input del compositor de columnas tiene placeholder `"ARCHIVAD"` (español, truncado — probablemente "ARCHIVADO")
+- Todo el resto de la UI (labels, headings, botones, modals, toasts, drawer) está en inglés
+- **Corrección sugerida**: unificar placeholders al mismo idioma que el resto de la interfaz (ej. `"Set up environment..."` y `"ARCHIVED"`)
+
+**B.2 — Branding cambia entre mobile y desktop**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`
+- Mobile header: `"ProjectFlow"` con subtítulo `"Focused delivery"`
+- Desktop hero: `"Kanban Board"` con eyebrow `"Focused delivery workspace"`
+- El nombre de producto es diferente según el viewport
+- **Corrección sugerida**: unificar el nombre del producto en ambos layouts
+
+---
+
+#### C — Código inalcanzable
+
+**C.1 — Modo de edición inline en TaskCard sin trigger visible**
+
+- Archivo: `kanban/src/ui/task/TaskCard.jsx`
+- El componente mantiene estado `isEditing` y renderiza un bloque de edición inline con input, botón "Save task" y "Cancel edit"
+- Sin embargo, ningún botón ni interacción en el estado no-editando establece `setIsEditing(true)`, por lo que el modo de edición es **código muerto inalcanzable**
+- **Corrección sugerida**: agregar un botón "Edit" en la barra de acciones de la card, o eliminar el bloque de edición inline si se prefiere que la edición ocurra exclusivamente en el drawer
+
+**C.2 — `canDeleteColumn` siempre `true`**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`
+- Se pasa `canDeleteColumn` como prop booleano sin valor: `<ColumnView ... canDeleteColumn />`, lo cual equivale a `canDeleteColumn={true}` en todas las columnas
+- La intención original era deshabilitar la eliminación cuando solo queda una columna, pero la lógica quedó desconectada
+- **Corrección sugerida**: restaurar la lógica condicional (`canDeleteColumn={columns.length > 1}`) o eliminar la prop si la restricción ya no aplica
+
+---
+
+#### D — Patrones de interacción divergentes
+
+**D.1 — Confirmación de eliminación inconsistente**
+
+- Eliminar una columna → modal de confirmación
+- Limpiar tareas de una columna → modal de confirmación
+- Eliminar una tarea desde la card → eliminación inmediata + toast con undo
+- Eliminar una tarea desde el drawer → eliminación inmediata + toast con undo
+- Las acciones destructivas no siguen un patrón uniforme; el usuario no puede predecir si habrá confirmación o no
+- **Corrección sugerida**: definir una política clara (ej. eliminaciones con pérdida masiva → modal, eliminaciones unitarias → undo toast) y documentarla
+
+**D.2 — Story points: guardado inmediato vs. guardado explícito en el drawer**
+
+- Archivo: `kanban/src/ui/task/TaskDetailDrawer.jsx`
+- Los campos de título, descripción, prioridad, labels y subtareas requieren click en "Save task" para persistir
+- Los story points se guardan **inmediatamente** al clickear la grilla o los botones "Lower estimate"/"Raise estimate" (llaman a `onSaveTask` directo)
+- Esto mezcla dos modelos de persistencia en la misma superficie
+- **Corrección sugerida**: unificar el modelo — o todos los campos se guardan al interactuar, o todos requieren save explícito
+
+**D.3 — Doble patrón de edición de story points**
+
+- En TaskCard: popover con grilla de selección disparado desde el badge de puntos
+- En TaskDetailDrawer: grilla de selección **más** botones "Lower estimate"/"Raise estimate"
+- Son dos patrones de interacción diferentes para la misma operación
+- **Corrección sugerida**: adoptar un único patrón (grilla directa) y eliminar los botones de incremento/decremento, o viceversa
+
+**D.4 — Icono `＋` para "Open details" sugiere "Add" en vez de "Open"**
+
+- Archivo: `kanban/src/ui/task/TaskCard.jsx`
+- El botón de abrir detalles usa un signo `＋` (fullwidth plus) que convencionalmente indica "crear/agregar", no "abrir/expandir"
+- **Corrección sugerida**: reemplazar por un icono de expansión o flecha (ej. `→`, `⤢`, o un chevron)
+
+---
+
+#### E — Menus y overlays sin cierre exterior
+
+**E.1 — Menú de acciones de columna no se cierra al hacer click fuera**
+
+- Archivo: `kanban/src/ui/column/ColumnView.jsx`
+- El menú de acciones (`isActionsMenuOpen`) solo se cierra al hacer click en el botón `···` de nuevo o al seleccionar una acción
+- Hacer click fuera del menú lo deja abierto, lo cual es inconsistente con el comportamiento estándar de dropdowns
+
+**E.2 — Popover de story points no se cierra al hacer click fuera**
+
+- Archivo: `kanban/src/ui/task/TaskCard.jsx`
+- El popover `isPointsSelectorOpen` solo se cierra al seleccionar un valor o al clickear el trigger de nuevo
+- Mismo problema que E.1
+
+**E.3 — Backdrop de modales no cierra al hacer click**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`
+- Los modales de confirmación (delete column, clear column) y el modal de exportación usan un backdrop con `role="presentation"` pero no tienen handler `onClick` para cerrar al clickear fuera
+- El drawer de detalle y la command palette tampoco cierran al hacer click en el backdrop
+- **Corrección sugerida**: agregar `onClick` en los backdrops que cierre el overlay correspondiente, con `stopPropagation` en el contenido para evitar cierre accidental
+
+---
+
+#### F — Notificaciones sin auto-dismiss
+
+**F.1 — Toast no desaparece automáticamente**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/board/useBoardViewModel.js`
+- El toast permanece visible indefinidamente hasta que el usuario hace click en "Dismiss" o "Undo"
+- Un nuevo toast reemplaza al anterior, pero si no hay nueva acción, el toast viejo persiste
+- **Corrección sugerida**: agregar timeout de auto-dismiss (ej. 6–8 segundos), cancelable si el usuario interactúa con el toast
+
+---
+
+#### G — Labels de botones inconsistentes en overlays
+
+**G.1 — Texto del botón de cierre varía entre overlays**
+
+- Command palette: `"Close"`
+- Task drawer: `"Close details"`
+- Export modal: `"Close export"` (aparece dos veces: header y footer)
+- Modal de delete column: `"Cancel"`
+- Modal de clear column: `"Cancel"`
+- **Corrección sugerida**: unificar la convención — `"Cancel"` para modales con acción pendiente, `"Close"` para overlays informativos o de edición
+
+---
+
+#### H — CSS con duplicaciones menores
+
+**H.1 — Regla duplicada para `.toast-card` en media query 720px**
+
+- Archivo: `kanban/src/ui/shared/board.css`
+- Dentro de `@media (max-width: 720px)`, `.toast-card` aparece dos veces con `min-width: 0; max-width: none;`:
+  - Una vez agrupado: `.command-palette, .toast-card, .export-modal { min-width: 0; max-width: none; }`
+  - Otra vez individual: `.toast-card { min-width: 0; max-width: none; }`
+- **Corrección sugerida**: eliminar la regla individual redundante
+
+**H.2 — Prefix `is-` inconsistente en clases de estado**
+
+- Estados que usan `is-`: `is-active`, `is-selected`, `is-complete`, `is-danger`, `is-primary`
+- Estados que no lo usan: `dragging`, `dragging-over`, `compact`
+- **Corrección sugerida**: adoptar una convención uniforme para clases de estado (ej. todas con `is-` o sin él)
+
+---
+
+**Proposed acceptance criteria**
+
+- Se eliminan las redundancias de información en el encabezado de columna y la card de exportación
+- Los placeholders y el branding usan un idioma consistente con el resto de la UI
+- Se elimina o reactiva el código inalcanzable de edición inline en TaskCard y la prop `canDeleteColumn`
+- Los patrones de confirmación ante eliminación siguen una política documentada
+- El modelo de persistencia en el drawer es uniforme entre story points y el resto de los campos
+- Menús, popovers y backdrops se cierran al hacer click fuera
+- El toast implementa auto-dismiss con timeout configurable
+- Los labels de cierre en overlays siguen una convención unificada
+- Se eliminan duplicaciones en el CSS y se unifica la convención de clases de estado
+
+**Notes**
+
+- Varias de estas inconsistencias provienen de haber iterado BF-001 a BF-005 de forma incremental sin una revisión transversal de UI/UX
+- Se recomienda resolver por categoría: primero redundancias y código muerto (bajo riesgo), luego interacciones y overlays (riesgo medio), y finalmente unificación de patrones de guardado (riesgo alto)
+- Cualquier cambio de idioma debe decidirse con intención: si la audiencia objetivo es hispanohablante, migrar toda la UI a español; si no, mantener inglés consistente
+
+**Deletion confirmation policy (D.1)**
+
+- Eliminación con pérdida masiva (columna completa, limpiar columna) → modal de confirmación explícito antes de ejecutar
+- Eliminación unitaria (una tarea) → eliminación inmediata con toast de undo y atajo `⌘Z`
+- Esta política queda documentada como convención del proyecto para futuras acciones destructivas
+
+**Deferred — H.2 Prefix `is-` inconsistente**
+
+- Las clases de estado mezclan prefijo `is-` (`is-active`, `is-selected`, `is-complete`, `is-danger`, `is-primary`) con clases sin prefijo (`dragging`, `dragging-over`, `compact`)
+- Se difiere la normalización porque requeriría cambios coordinados entre CSS, JSX y tests sin impacto funcional directo
+- Se adopta como convención futura usar `is-` para estados booleanos toggleable y dejar sin prefijo los estados de contexto (drag state, layout variant)
+
+**Closure review**
+
+Todas las inconsistencias detectadas fueron resueltas excepto H.2 (diferido):
+
+- **A.1** — Se eliminó el conteo duplicado del `<h2>` en columnas, dejando solo el `column-count-badge`
+- **A.2** — Se eliminó el chip estático "Workflow" de todas las columnas
+- **A.3** — Se simplificaron los accesos de exportación: se eliminó el botón "Open commands" de la card y el comando "Open export options" de la palette
+- **B.1** — Los placeholders se unificaron al inglés (`"Set up CI environment..."`, `"ARCHIVED"`)
+- **B.2** — El branding mobile ahora muestra "Kanban Board" en vez de "ProjectFlow"
+- **C.1** — Se eliminó el código muerto de edición inline en TaskCard (estado `isEditing`, bloque condicional completo)
+- **C.2** — Se eliminó la prop `canDeleteColumn` que siempre era `true`; el empty state con "Restore starter board" cubre el escenario de tablero sin columnas
+- **D.1** — Se documentó la política de confirmación de eliminación
+- **D.2** — Los story points en el drawer ahora usan estado local y se persisten solo al hacer click en "Save task", como el resto de los campos
+- **D.3** — Se eliminaron los botones "Lower estimate"/"Raise estimate" del drawer, dejando solo la grilla directa de selección
+- **D.4** — El icono de "Open details" pasó de `＋` (sugiere "add") a `→` (sugiere "open/expand")
+- **E.1** — El menú de acciones de columna se cierra al hacer click fuera
+- **E.2** — El popover de story points en las cards se cierra al hacer click fuera
+- **E.3** — Todos los backdrops (modales, drawer, command palette) cierran al hacer click fuera del contenido
+- **F.1** — El toast implementa auto-dismiss tras 6 segundos, cancelable si el usuario interactúa antes
+- **G.1** — Los labels de cierre siguen la convención: "Cancel" en modales con acción pendiente, "Close" en overlays de edición/consulta
+- **H.1** — Se eliminó la regla CSS duplicada de `.toast-card` en el breakpoint 720px
+- La suite de tests y el build siguen pasando tras todos los cambios (`npm test` 15/15, `npm run build` OK)

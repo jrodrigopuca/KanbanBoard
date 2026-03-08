@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Droppable } from "@hello-pangea/dnd";
 import TaskCard from "../task/TaskCard";
 import "../shared/board.css";
@@ -14,11 +14,11 @@ const ColumnView = ({
     onRenameColumn,
     onDeleteColumn,
     onClearColumn,
-    canDeleteColumn,
 }) => {
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
     const [editedTitle, setEditedTitle] = useState(title);
+    const actionsMenuRef = useRef(null);
 
     useEffect(() => {
         setEditedTitle(title);
@@ -31,6 +31,27 @@ const ColumnView = ({
 
         setIsActionsMenuOpen(false);
     }, [isEditingTitle]);
+
+    useEffect(() => {
+        if (!isActionsMenuOpen) {
+            return;
+        }
+
+        const handleClickOutside = (event) => {
+            if (
+                actionsMenuRef.current &&
+                !actionsMenuRef.current.contains(event.target)
+            ) {
+                setIsActionsMenuOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isActionsMenuOpen]);
 
     const handleSaveTitle = () => {
         const didSave = onRenameColumn(id, editedTitle);
@@ -103,16 +124,13 @@ const ColumnView = ({
                 ) : (
                     <>
                         <div className="column-meta-row">
-                            <span className="column-chip">Workflow</span>
                             <span className="column-count-badge">
                                 {tasks.length} {tasks.length === 1 ? "card" : "cards"}
                             </span>
                         </div>
                         <div className="column-title-row">
-                            <h2>
-                                {title} ({tasks.length})
-                            </h2>
-                            <div className="column-actions">
+                            <h2>{title}</h2>
+                            <div className="column-actions" ref={actionsMenuRef}>
                                 <button
                                     aria-expanded={isActionsMenuOpen}
                                     aria-haspopup="menu"
@@ -153,7 +171,6 @@ const ColumnView = ({
                                         <button
                                             aria-label={`Delete column ${title}`}
                                             className="column-action-item is-danger"
-                                            disabled={!canDeleteColumn}
                                             onClick={handleDeleteColumn}
                                             role="menuitem"
                                             type="button"

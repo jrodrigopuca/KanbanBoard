@@ -43,6 +43,20 @@ export const useBoardViewModel = () => {
     const [toast, setToast] = useState(null);
 
     useEffect(() => {
+        if (!toast) {
+            return;
+        }
+
+        const timerId = setTimeout(() => {
+            setToast(null);
+        }, 6000);
+
+        return () => {
+            clearTimeout(timerId);
+        };
+    }, [toast]);
+
+    useEffect(() => {
         saveBoard({
             boardRepository,
             columns,

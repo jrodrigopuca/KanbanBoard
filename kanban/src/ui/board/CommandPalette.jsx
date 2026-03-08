@@ -14,11 +14,16 @@ const CommandPalette = ({
     }
 
     return (
-        <div className="command-palette-backdrop" role="presentation">
+        <div
+            className="command-palette-backdrop"
+            onClick={onClose}
+            role="presentation"
+        >
             <div
                 aria-labelledby="command-palette-title"
                 aria-modal="true"
                 className="command-palette"
+                onClick={(event) => event.stopPropagation()}
                 role="dialog"
             >
                 <div className="command-palette-header">

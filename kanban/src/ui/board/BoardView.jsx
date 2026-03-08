@@ -184,13 +184,6 @@ const BoardView = ({
                 action: () => runPaletteCommand(onExportCsv),
             },
             {
-                id: "open-export",
-                label: "Open export options",
-                group: "Export",
-                description: "Choose JSON or CSV and review the estimated size",
-                action: () => runPaletteCommand(handleOpenExportModal),
-            },
-            {
                 id: "restore-board",
                 label: "Restore starter board",
                 group: "Board",
@@ -335,7 +328,7 @@ const BoardView = ({
                 {isMobileLayout && (
                     <div className="mobile-board-header">
                         <div className="mobile-header-brand">
-                            <span className="mobile-header-title">ProjectFlow</span>
+                            <span className="mobile-header-title">Kanban Board</span>
                             <span className="mobile-header-caption">Focused delivery</span>
                         </div>
                         <button
@@ -393,7 +386,7 @@ const BoardView = ({
                                     ref={addTaskInputRef}
                                     className="task-composer-input"
                                     type="text"
-                                    placeholder="Configurar entorno de"
+                                    placeholder="Set up CI environment..."
                                     value={newTaskInput}
                                     onChange={(event) => setNewTaskInput(event.target.value)}
                                     onKeyDown={(event) => {
@@ -435,7 +428,7 @@ const BoardView = ({
                                 ref={addColumnInputRef}
                                 type="text"
                                 className="column-composer-input"
-                                placeholder="ARCHIVAD"
+                                placeholder="ARCHIVED"
                                 value={newColumnInput}
                                 onChange={(event) => setNewColumnInput(event.target.value)}
                                 onKeyDown={(event) => {
@@ -470,18 +463,11 @@ const BoardView = ({
                         </div>
                         <div className="composer-form export-actions">
                             <button
-                                className="action-button subtle-button"
-                                onClick={() => setIsCommandPaletteOpen(true)}
-                                type="button"
-                            >
-                                Open commands
-                            </button>
-                            <button
                                 className="action-button primary-button"
                                 onClick={handleOpenExportModal}
                                 type="button"
                             >
-                                Open export
+                                Export board
                             </button>
                         </div>
                     </div>
@@ -609,7 +595,6 @@ const BoardView = ({
                                                         : ""
                                                 }
                                                 key={column.id}
-                                                canDeleteColumn
                                                 onClearColumn={onRequestClearColumn}
                                                 onDeleteColumn={onRequestDeleteColumn}
                                                 onRenameColumn={onRenameColumn}
@@ -627,11 +612,16 @@ const BoardView = ({
             </section>
 
             {columnPendingDelete && (
-                <div className="modal-overlay" role="presentation">
+                <div
+                    className="modal-overlay"
+                    onClick={onCloseDeleteModal}
+                    role="presentation"
+                >
                     <div
                         aria-labelledby="delete-column-title"
                         aria-modal="true"
                         className="confirmation-modal"
+                        onClick={(event) => event.stopPropagation()}
                         role="dialog"
                     >
                         <h2 id="delete-column-title">
@@ -662,11 +652,16 @@ const BoardView = ({
             )}
 
             {columnPendingClear && (
-                <div className="modal-overlay" role="presentation">
+                <div
+                    className="modal-overlay"
+                    onClick={onCloseClearModal}
+                    role="presentation"
+                >
                     <div
                         aria-labelledby="clear-column-title"
                         aria-modal="true"
                         className="confirmation-modal"
+                        onClick={(event) => event.stopPropagation()}
                         role="dialog"
                     >
                         <h2 id="clear-column-title">
@@ -697,11 +692,16 @@ const BoardView = ({
             )}
 
             {isExportModalOpen && (
-                <div className="modal-overlay" role="presentation">
+                <div
+                    className="modal-overlay"
+                    onClick={closeExportModal}
+                    role="presentation"
+                >
                     <div
                         aria-labelledby="export-board-title"
                         aria-modal="true"
                         className="export-modal"
+                        onClick={(event) => event.stopPropagation()}
                         role="dialog"
                     >
                         <div className="export-modal-header">
@@ -718,7 +718,7 @@ const BoardView = ({
                                 onClick={closeExportModal}
                                 type="button"
                             >
-                                Close export
+                                Close
                             </button>
                         </div>
 
@@ -762,7 +762,7 @@ const BoardView = ({
                                     onClick={closeExportModal}
                                     type="button"
                                 >
-                                    Close export
+                                    Cancel
                                 </button>
                                 <button
                                     className="action-button primary-button"

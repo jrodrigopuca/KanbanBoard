@@ -1836,11 +1836,6 @@ button:disabled,
     align-items: stretch;
   }
 
-  .toast-card {
-    min-width: 0;
-    max-width: none;
-  }
-
   .export-modal-header,
   .export-modal-footer {
     flex-direction: column;

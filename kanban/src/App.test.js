@@ -65,7 +65,7 @@ test("renders an empty board state and can restore starter columns", async () =>
     );
 
     expect(
-        await screen.findByRole("heading", { name: /to do \(2\)/i }),
+        await screen.findByRole("heading", { name: /^to do$/i }),
     ).toBeInTheDocument();
 });
 
@@ -173,10 +173,10 @@ test("exports board data as json and csv", async () => {
 
     render(<App />);
 
-    fireEvent.click(screen.getByRole("button", { name: /open export/i }));
+    fireEvent.click(screen.getByRole("button", { name: /export board/i }));
     fireEvent.click(screen.getByRole("button", { name: /download json/i }));
 
-    fireEvent.click(screen.getByRole("button", { name: /open export/i }));
+    fireEvent.click(screen.getByRole("button", { name: /export board/i }));
     fireEvent.click(
         screen.getByRole("button", { name: /table format \(csv\)/i }),
     );
@@ -382,7 +382,7 @@ test("renames a column from the column actions", async () => {
     fireEvent.keyDown(input, { key: "Enter", code: "Enter", charCode: 13 });
 
     expect(
-        await screen.findByRole("heading", { name: /backlog \(2\)/i }),
+        await screen.findByRole("heading", { name: /^backlog$/i }),
     ).toBeInTheDocument();
 });
 
@@ -407,7 +407,7 @@ test("confirms before deleting a column and removes its cards", async () => {
     fireEvent.click(screen.getByRole("button", { name: /^delete column$/i }));
 
     expect(
-        screen.queryByRole("heading", { name: /to do \(2\)/i }),
+        screen.queryByRole("heading", { name: /^to do$/i }),
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/hello/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

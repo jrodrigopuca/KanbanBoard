@@ -3,7 +3,6 @@ import { createSubtaskModel } from "../../domain/models/subtask";
 import {
     STORY_POINTS,
     getDefaultStoryPoints,
-    getNextStoryPoints,
 } from "../../domain/services/storyPoints";
 import {
     DEFAULT_PRIORITY,
@@ -22,6 +21,7 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
     );
     const [labelInput, setLabelInput] = useState((task.labels || []).join(", "));
     const [subtasks, setSubtasks] = useState(normalizeSubtasks(task.subtasks));
+    const [points, setPoints] = useState(task.points || getDefaultStoryPoints());
     const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
 
     useEffect(() => {
@@ -30,10 +30,10 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
         setPriority(normalizePriority(task.priority || DEFAULT_PRIORITY));
         setLabelInput((task.labels || []).join(", "));
         setSubtasks(normalizeSubtasks(task.subtasks));
+        setPoints(task.points || getDefaultStoryPoints());
         setNewSubtaskTitle("");
     }, [task]);
 
-    const pointsToShow = task.points || getDefaultStoryPoints();
     const dateToShow = task.date
         ? new Date(task.date).toLocaleString()
         : "No recent updates";
@@ -47,25 +47,13 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
             priority,
             labels: normalizedLabels,
             subtasks,
-            date: Date.now(),
-        });
-    };
-
-    const handleChangePoints = (direction) => {
-        onSaveTask(task.id, {
-            points: getNextStoryPoints({
-                currentPoints: task.points,
-                direction,
-            }),
+            points,
             date: Date.now(),
         });
     };
 
     const handleSelectPoints = (nextPoints) => {
-        onSaveTask(task.id, {
-            points: nextPoints,
-            date: Date.now(),
-        });
+        setPoints(nextPoints);
     };
 
     const handleAddSubtask = () => {
@@ -104,11 +92,16 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
     };
 
     return (
-        <div className="task-drawer-backdrop" role="presentation">
+        <div
+            className="task-drawer-backdrop"
+            onClick={onClose}
+            role="presentation"
+        >
             <aside
                 aria-labelledby="task-drawer-title"
                 aria-modal="true"
                 className="task-drawer"
+                onClick={(event) => event.stopPropagation()}
                 role="dialog"
             >
                 <div className="task-drawer-header">
@@ -128,7 +121,7 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                         onClick={onClose}
                         type="button"
                     >
-                        Close details
+                        Close
                     </button>
                 </div>
 
@@ -138,7 +131,7 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                     <span className={`task-priority-badge task-priority-${priority}`}>
                         {getPriorityLabel(priority)}
                     </span>
-                    <span className="task-points task-points-static">{pointsToShow}</span>
+                    <span className="task-points task-points-static">{points}</span>
                 </div>
 
                 <div className="task-drawer-content">
@@ -282,14 +275,14 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                             <p className="board-eyebrow">Estimate</p>
                             <h3>Refine the effort with the same scale used on the card</h3>
                         </div>
-                        <span className="task-points task-points-static">{pointsToShow}</span>
+                        <span className="task-points task-points-static">{points}</span>
                     </div>
                     <div className="task-drawer-points-grid">
                         {STORY_POINTS.map((storyPoint) => (
                             <button
                                 aria-label={`Set ${storyPoint} story points for ${task.title}`}
                                 className={`action-button task-points-option ${
-                                    storyPoint === pointsToShow ? "is-selected" : ""
+                                    storyPoint === points ? "is-selected" : ""
                                 }`}
                                 key={storyPoint}
                                 onClick={() => handleSelectPoints(storyPoint)}
@@ -299,24 +292,7 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                             </button>
                         ))}
                     </div>
-                    <div className="task-drawer-actions">
-                        <button
-                            aria-label={`Decrease story points for ${task.title}`}
-                            className="action-button subtle-button task-action-button"
-                            onClick={() => handleChangePoints("decrease")}
-                            type="button"
-                        >
-                            Lower estimate
-                        </button>
-                        <button
-                            aria-label={`Increase story points for ${task.title}`}
-                            className="action-button subtle-button task-action-button"
-                            onClick={() => handleChangePoints("increase")}
-                            type="button"
-                        >
-                            Raise estimate
-                        </button>
-                    </div>
+
                 </div>
 
                 <div className="task-drawer-footer task-action-bar">
@@ -326,7 +302,7 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                         onClick={onClose}
                         type="button"
                     >
-                        Close details
+                        Close
                     </button>
                     <button
                         aria-label={`Delete task ${task.title}`}

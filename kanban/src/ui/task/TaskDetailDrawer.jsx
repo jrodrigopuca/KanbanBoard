@@ -112,9 +112,15 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                 role="dialog"
             >
                 <div className="task-drawer-header">
-                    <div>
+                    <div className="task-drawer-summary">
                         <p className="board-eyebrow">Task details</p>
-                        <h2 id="task-drawer-title">{task.title}</h2>
+                        <div className="task-drawer-title-row">
+                            <span
+                                aria-hidden="true"
+                                className={`task-priority-dot task-priority-dot-${priority}`}
+                            />
+                            <h2 id="task-drawer-title">{task.title}</h2>
+                        </div>
                     </div>
                     <button
                         aria-label="Close task details"
@@ -128,11 +134,11 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
 
                 <div className="task-drawer-meta">
                     <span className="column-chip">{task.columnTitle}</span>
-                    <span className="task-date">Updated {dateToShow}</span>
+                    <span className="task-date task-date-inline">Updated {dateToShow}</span>
                     <span className={`task-priority-badge task-priority-${priority}`}>
                         {getPriorityLabel(priority)}
                     </span>
-                    <span className="task-points">{pointsToShow}</span>
+                    <span className="task-points task-points-static">{pointsToShow}</span>
                 </div>
 
                 <div className="task-drawer-content">
@@ -271,7 +277,13 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                 </div>
 
                 <div className="task-drawer-section">
-                    <p className="board-eyebrow">Estimate</p>
+                    <div className="task-drawer-section-header">
+                        <div>
+                            <p className="board-eyebrow">Estimate</p>
+                            <h3>Refine the effort with the same scale used on the card</h3>
+                        </div>
+                        <span className="task-points task-points-static">{pointsToShow}</span>
+                    </div>
                     <div className="task-drawer-points-grid">
                         {STORY_POINTS.map((storyPoint) => (
                             <button

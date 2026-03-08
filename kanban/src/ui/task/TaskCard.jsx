@@ -3,7 +3,6 @@ import { Draggable } from "@hello-pangea/dnd";
 import {
     STORY_POINTS,
     getDefaultStoryPoints,
-    getNextStoryPoints,
 } from "../../domain/services/storyPoints";
 import {
     DEFAULT_PRIORITY,
@@ -14,11 +13,28 @@ import {
 import { getSubtaskProgress } from "../../domain/services/subtasks";
 import "../shared/board.css";
 
+export const getTaskCardStyle = (style, isDragging) => {
+    if (!style) {
+        return undefined;
+    }
+
+    if (!isDragging || !style.transform) {
+        return style;
+    }
+
+    return {
+        ...style,
+        transform: `${style.transform} rotate(1deg) scale(1.01)`,
+        zIndex: 6,
+    };
+};
+
 const TaskCard = ({
     id,
     title,
     date,
     points,
+    description,
     priority,
     labels,
     subtasks,
@@ -33,16 +49,6 @@ const TaskCard = ({
 
     const handleDelete = () => {
         onDelete(id);
-    };
-
-    const handleChangePoints = (direction = "increase") => {
-        setIsPointsSelectorOpen(false);
-        onEdit(id, {
-            points: getNextStoryPoints({
-                currentPoints: points,
-                direction,
-            }),
-        });
     };
 
     const handleSelectPoints = (nextPoints) => {
@@ -60,6 +66,7 @@ const TaskCard = ({
     const taskPriority = normalizePriority(priority || DEFAULT_PRIORITY);
     const taskLabels = normalizeLabels(labels);
     const subtaskProgress = getSubtaskProgress(subtasks);
+    const descriptionPreview = description?.trim();
 
     return (
         <Draggable draggableId={id} index={indexTask}>
@@ -69,6 +76,10 @@ const TaskCard = ({
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                     ref={provided.innerRef}
+                    style={getTaskCardStyle(
+                        provided.draggableProps.style,
+                        snapshot.isDragging,
+                    )}
                 >
                     {isEditing ? (
                         <div className="task-editor">
@@ -101,116 +112,119 @@ const TaskCard = ({
                     ) : (
                         <>
                             <div className="task-header">
-                                <span className="task-kind">Card</span>
-                                <span
-                                    className={`task-priority-badge task-priority-${taskPriority}`}
-                                >
-                                    {getPriorityLabel(taskPriority)}
-                                </span>
-                                <button
-                                    aria-expanded={isPointsSelectorOpen}
-                                    aria-haspopup="dialog"
-                                    aria-label={`Story points for ${title}`}
-                                    className="task-points task-points-trigger"
-                                    onClick={() =>
-                                        setIsPointsSelectorOpen(
-                                            (currentValue) => !currentValue,
-                                        )
-                                    }
-                                    title="Story points"
-                                    type="button"
-                                >
-                                    {pointsToShow}
-                                </button>
+                                <div className="task-title-stack">
+                                    <div className="task-title-row">
+                                        <span
+                                            aria-hidden="true"
+                                            className={`task-priority-dot task-priority-dot-${taskPriority}`}
+                                        />
+                                        <p className="task-title">{title}</p>
+                                    </div>
+                                    {descriptionPreview && (
+                                        <p className="task-description-preview">
+                                            {descriptionPreview}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
-
-                            {isPointsSelectorOpen && (
-                                <div className="task-points-popover" role="dialog">
-                                    <p className="task-points-popover-label">
-                                        Estimate (points)
-                                    </p>
-                                    <div className="task-points-options">
-                                        {STORY_POINTS.map((storyPoint) => (
+                            <div className="task-footer">
+                                <div className="task-date task-date-inline">{dateToShow}</div>
+                                <div className="task-bottom-row">
+                                    <div className="task-meta-row">
+                                        <span
+                                            className={`task-priority-badge task-priority-${taskPriority}`}
+                                        >
+                                            {getPriorityLabel(taskPriority)}
+                                        </span>
+                                        {taskLabels.length > 0 && (
+                                            <div className="task-label-list">
+                                                {taskLabels.map((label) => (
+                                                    <span className="task-label-chip" key={label}>
+                                                        {label}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {subtaskProgress.total > 0 && (
+                                            <div className="task-subtask-progress">
+                                                <span className="task-subtask-badge">
+                                                    {subtaskProgress.completed}/{subtaskProgress.total} subtasks
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="task-trailing-controls">
+                                        {isPointsSelectorOpen && (
+                                            <div className="task-points-popover" role="dialog">
+                                                <p className="task-points-popover-label">
+                                                    Estimate (points)
+                                                </p>
+                                                <div className="task-points-options">
+                                                    {STORY_POINTS.map((storyPoint) => (
+                                                        <button
+                                                            aria-label={`Set ${storyPoint} story points for ${title}`}
+                                                            className={`task-points-option ${
+                                                                storyPoint === pointsToShow
+                                                                    ? "is-selected"
+                                                                    : ""
+                                                            }`}
+                                                            key={storyPoint}
+                                                            onClick={() =>
+                                                                handleSelectPoints(storyPoint)
+                                                            }
+                                                            type="button"
+                                                        >
+                                                            {storyPoint}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        <button
+                                            aria-expanded={isPointsSelectorOpen}
+                                            aria-haspopup="dialog"
+                                            aria-label={`Story points for ${title}`}
+                                            className="task-points task-points-trigger"
+                                            onClick={() =>
+                                                setIsPointsSelectorOpen(
+                                                    (currentValue) => !currentValue,
+                                                )
+                                            }
+                                            title="Story points"
+                                            type="button"
+                                        >
+                                            <span>{pointsToShow}</span>
+                                            <span aria-hidden="true" className="task-points-caret">
+                                                ▾
+                                            </span>
+                                        </button>
+                                        <div className="task-actions">
                                             <button
-                                                aria-label={`Set ${storyPoint} story points for ${title}`}
-                                                className={`task-points-option ${
-                                                    storyPoint === pointsToShow
-                                                        ? "is-selected"
-                                                        : ""
-                                                }`}
-                                                key={storyPoint}
-                                                onClick={() =>
-                                                    handleSelectPoints(storyPoint)
-                                                }
+                                                aria-label={`View details for ${title}`}
+                                                className="action-button subtle-button task-icon-button"
+                                                onClick={() => onOpenDetails(id)}
                                                 type="button"
                                             >
-                                                {storyPoint}
+                                                ↗
                                             </button>
-                                        ))}
+                                            <button
+                                                aria-label={`Edit task ${title}`}
+                                                className="action-button subtle-button task-icon-button"
+                                                onClick={() => setIsEditing(true)}
+                                                type="button"
+                                            >
+                                                ✎
+                                            </button>
+                                            <button
+                                                aria-label={`Delete task ${title}`}
+                                                className="action-button danger-button task-icon-button"
+                                                onClick={handleDelete}
+                                                type="button"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-
-                            <p className="task-title">{title}</p>
-                            {taskLabels.length > 0 && (
-                                <div className="task-label-list">
-                                    {taskLabels.map((label) => (
-                                        <span className="task-label-chip" key={label}>
-                                            {label}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                            {subtaskProgress.total > 0 && (
-                                <div className="task-subtask-progress">
-                                    <span className="task-subtask-badge">
-                                        {subtaskProgress.completed}/{subtaskProgress.total} subtasks
-                                    </span>
-                                </div>
-                            )}
-                            <div className="task-footer">
-                                <div className="task-date">{dateToShow}</div>
-                                <div className="task-actions">
-                                    <button
-                                        aria-label={`View details for ${title}`}
-                                        className="action-button subtle-button"
-                                        onClick={() => onOpenDetails(id)}
-                                        type="button"
-                                    >
-                                        Details
-                                    </button>
-                                    <button
-                                        aria-label={`Delete task ${title}`}
-                                        className="action-button danger-button"
-                                        onClick={handleDelete}
-                                        type="button"
-                                    >
-                                        Delete
-                                    </button>
-                                    <button
-                                        aria-label={`Edit task ${title}`}
-                                        className="action-button subtle-button"
-                                        onClick={() => setIsEditing(true)}
-                                        type="button"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        aria-label={`Increase story points for ${title}`}
-                                        className="action-button subtle-button"
-                                        onClick={() => handleChangePoints("increase")}
-                                        type="button"
-                                    >
-                                        +SP
-                                    </button>
-                                    <button
-                                        aria-label={`Decrease story points for ${title}`}
-                                        className="action-button subtle-button"
-                                        onClick={() => handleChangePoints("decrease")}
-                                        type="button"
-                                    >
-                                        -SP
-                                    </button>
                                 </div>
                             </div>
                         </>

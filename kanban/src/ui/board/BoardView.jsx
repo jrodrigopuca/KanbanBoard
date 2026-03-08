@@ -588,7 +588,7 @@ const BoardView = ({
                                                         : ""
                                                 }
                                                 key={column.id}
-                                                canDeleteColumn={columns.length > 1}
+                                                canDeleteColumn
                                                 onClearColumn={onRequestClearColumn}
                                                 onDeleteColumn={onRequestDeleteColumn}
                                                 onRenameColumn={onRenameColumn}

@@ -22,8 +22,10 @@ const boardRepository = createLocalStorageBoardRepository({
     storage: typeof window === "undefined" ? null : window.localStorage,
 });
 
-const createInitialColumns = () =>
+const createStarterColumns = () =>
     createDefaultColumns({ createId: createBrowserId });
+
+const createInitialColumns = () => [];
 
 const initColumns = () =>
     loadBoard({
@@ -159,7 +161,7 @@ export const useBoardViewModel = () => {
     const handleRequestDeleteColumn = (columnId) => {
         const columnToDelete = columns.find((column) => column.id === columnId);
 
-        if (!columnToDelete || columns.length <= 1) {
+        if (!columnToDelete) {
             return;
         }
 
@@ -249,7 +251,7 @@ export const useBoardViewModel = () => {
     };
 
     const handleRestoreDefaultBoard = () => {
-        setColumns(createInitialColumns());
+        setColumns(createStarterColumns());
         setColumnPendingDelete(null);
         setColumnPendingClear(null);
         setSelectedTaskId(null);

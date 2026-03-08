@@ -1,24 +1,39 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 import App from "./App";
+import { createDefaultColumns } from "./domain/models/board";
+
+const seedStarterBoard = () => {
+    let currentId = 0;
+
+    window.localStorage.setItem(
+        "localColumns",
+        JSON.stringify(
+            createDefaultColumns({
+                createId: () => `test-id-${currentId++}`,
+                now: () => 1_700_000_000_000,
+            }),
+        ),
+    );
+};
 
 beforeEach(() => {
     window.localStorage.clear();
 });
 
-test("renders the kanban board title and default columns", () => {
+test("renders the kanban board empty by default", () => {
     render(<App />);
 
     expect(screen.getByText(/kanban board/i)).toBeInTheDocument();
     expect(
-        screen.getByRole("button", { name: /open actions for column to do/i }),
+        screen.getByRole("heading", { name: /no workflow columns yet/i }),
     ).toBeInTheDocument();
     expect(
-        screen.getByRole("heading", { name: /progress \(0\)/i }),
+        screen.getByRole("button", { name: /restore starter board/i }),
     ).toBeInTheDocument();
 });
 
-test("falls back to default columns when persisted data is invalid", () => {
+test("falls back to the empty board state when persisted data is invalid", () => {
     const consoleErrorSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
@@ -30,7 +45,7 @@ test("falls back to default columns when persisted data is invalid", () => {
     expect(consoleErrorSpy).toHaveBeenCalled();
     expect(screen.getByText(/kanban board/i)).toBeInTheDocument();
     expect(
-        screen.getByRole("heading", { name: /done \(0\)/i }),
+        screen.getByRole("heading", { name: /no workflow columns yet/i }),
     ).toBeInTheDocument();
 
     consoleErrorSpy.mockRestore();
@@ -55,6 +70,7 @@ test("renders an empty board state and can restore starter columns", async () =>
 });
 
 test("opens the task detail drawer and saves task changes", async () => {
+    seedStarterBoard();
     render(<App />);
 
     fireEvent.click(
@@ -125,6 +141,7 @@ test("opens the task detail drawer and saves task changes", async () => {
 });
 
 test("exports board data as json and csv", async () => {
+    seedStarterBoard();
     const createObjectURL = vi.fn(() => "blob:mock-url");
     const revokeObjectURL = vi.fn();
     const BlobMock = vi.fn(function Blob(parts, options) {
@@ -172,6 +189,7 @@ test("exports board data as json and csv", async () => {
 });
 
 test("shows undo toast after deleting a task and restores it", async () => {
+    seedStarterBoard();
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: /delete task hello/i }));
@@ -188,6 +206,7 @@ test("shows undo toast after deleting a task and restores it", async () => {
 });
 
 test("clears a column with confirmation and can undo it", async () => {
+    seedStarterBoard();
     render(<App />);
 
     fireEvent.click(
@@ -220,6 +239,7 @@ test("clears a column with confirmation and can undo it", async () => {
 });
 
 test("opens command palette and runs commands", async () => {
+    seedStarterBoard();
     const createObjectURL = vi.fn(() => "blob:palette-url");
     const revokeObjectURL = vi.fn();
     const BlobMock = vi.fn(function Blob(parts, options) {
@@ -289,6 +309,7 @@ test("opens command palette and runs commands", async () => {
 });
 
 test("navigates command palette with arrow keys and enter", async () => {
+    seedStarterBoard();
     render(<App />);
 
     fireEvent.keyDown(window, { key: "k", metaKey: true });
@@ -311,6 +332,7 @@ test("navigates command palette with arrow keys and enter", async () => {
 });
 
 test("opens the story point selector and applies a direct estimate", async () => {
+    seedStarterBoard();
     render(<App />);
 
     fireEvent.click(
@@ -324,6 +346,7 @@ test("opens the story point selector and applies a direct estimate", async () =>
 });
 
 test("renames a column from the column actions", async () => {
+    seedStarterBoard();
     render(<App />);
 
     fireEvent.click(
@@ -345,6 +368,7 @@ test("renames a column from the column actions", async () => {
 });
 
 test("confirms before deleting a column and removes its cards", async () => {
+    seedStarterBoard();
     render(<App />);
 
     fireEvent.click(
@@ -368,4 +392,40 @@ test("confirms before deleting a column and removes its cards", async () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/hello/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+test("allows deleting the last remaining column and returns to the empty state", async () => {
+    window.localStorage.setItem(
+        "localColumns",
+        JSON.stringify([
+            {
+                id: "column-1",
+                title: "Solo",
+                tasks: [],
+            },
+        ]),
+    );
+
+    render(<App />);
+
+    fireEvent.click(
+        screen.getByRole("button", { name: /open actions for column solo/i }),
+    );
+    fireEvent.click(
+        screen.getByRole("menuitem", { name: /delete column solo/i }),
+    );
+
+    expect(
+        await screen.findByText(
+            /this action will remove the column and permanently delete all its cards \(0\)/i,
+        ),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^delete column$/i }));
+
+    expect(
+        await screen.findByRole("heading", {
+            name: /no workflow columns yet/i,
+        }),
+    ).toBeInTheDocument();
 });

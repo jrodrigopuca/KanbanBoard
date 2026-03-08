@@ -14,6 +14,8 @@ export const createDefaultColumns = ({ createId, now = () => Date.now() }) => {
                     title: "Hello",
                     date: timestamp,
                     points: 1,
+                    description:
+                        "Review the refreshed board layout and align the card spacing with the visual system.",
                     priority: "high",
                     labels: ["UI", "Planning"],
                     subtasks: [
@@ -34,6 +36,8 @@ export const createDefaultColumns = ({ createId, now = () => Date.now() }) => {
                     title: "World",
                     date: timestamp,
                     points: 1,
+                    description:
+                        "Prepare the supporting API notes and verify the updated interactions end to end.",
                     priority: "medium",
                     labels: ["Backend"],
                     subtasks: [

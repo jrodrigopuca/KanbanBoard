@@ -5,11 +5,26 @@ import ColumnView from "../column/ColumnView";
 import TaskDetailDrawer from "../task/TaskDetailDrawer";
 import "../shared/board.css";
 
+const MOBILE_MEDIA_QUERY = "(max-width: 720px)";
+
+const getIsMobileLayout = () => {
+    if (typeof window === "undefined") {
+        return false;
+    }
+
+    if (typeof window.matchMedia === "function") {
+        return window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+    }
+
+    return window.innerWidth <= 720;
+};
+
 const BoardView = ({
     columns,
     newColumnInput,
     newTaskInput,
     columnPendingDelete,
+    columnPendingClear,
     selectedTask,
     toast,
     setNewColumnInput,
@@ -21,8 +36,11 @@ const BoardView = ({
     onAddColumn,
     onRenameColumn,
     onRequestDeleteColumn,
+    onRequestClearColumn,
     onCloseDeleteModal,
     onConfirmDeleteColumn,
+    onCloseClearModal,
+    onConfirmClearColumn,
     onRestoreDefaultBoard,
     onOpenTaskDetails,
     onCloseTaskDetails,
@@ -32,8 +50,14 @@ const BoardView = ({
     onUndoToast,
 }) => {
     const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [selectedExportFormat, setSelectedExportFormat] = useState("json");
     const [commandQuery, setCommandQuery] = useState("");
     const [activeCommandIndex, setActiveCommandIndex] = useState(0);
+    const [isMobileLayout, setIsMobileLayout] = useState(getIsMobileLayout);
+    const [activeMobileColumnId, setActiveMobileColumnId] = useState(
+        columns[0]?.id ?? null,
+    );
     const addTaskInputRef = useRef(null);
     const addColumnInputRef = useRef(null);
     const totalTasks = columns.reduce(
@@ -43,11 +67,25 @@ const BoardView = ({
     const populatedColumns = columns.filter((column) => column.tasks.length > 0).length;
     const hasColumns = columns.length > 0;
     const hasTasks = totalTasks > 0;
+    const estimatedExportSize = useMemo(() => {
+        const sizeInBytes = new Blob([JSON.stringify(columns)]).size;
+
+        if (sizeInBytes < 1024) {
+            return `${sizeInBytes} B`;
+        }
+
+        return `${(sizeInBytes / 1024).toFixed(1)} KB`;
+    }, [columns]);
 
     const closeCommandPalette = () => {
         setIsCommandPaletteOpen(false);
         setCommandQuery("");
         setActiveCommandIndex(0);
+    };
+
+    const closeExportModal = () => {
+        setIsExportModalOpen(false);
+        setSelectedExportFormat("json");
     };
 
     const runPaletteCommand = (commandAction) => {
@@ -61,6 +99,48 @@ const BoardView = ({
 
     const focusColumnComposer = () => {
         addColumnInputRef.current?.focus();
+    };
+
+    const handleOpenExportModal = () => {
+        setIsExportModalOpen(true);
+    };
+
+    const handleSubmitExport = () => {
+        if (selectedExportFormat === "csv") {
+            onExportCsv();
+        } else {
+            onExportJson();
+        }
+
+        closeExportModal();
+    };
+
+    const handleSelectPreviousColumn = () => {
+        if (!columns.length) {
+            return;
+        }
+
+        const currentIndex = columns.findIndex(
+            (column) => column.id === activeMobileColumnId,
+        );
+        const safeIndex = currentIndex >= 0 ? currentIndex : 0;
+        const nextIndex = safeIndex <= 0 ? columns.length - 1 : safeIndex - 1;
+
+        setActiveMobileColumnId(columns[nextIndex].id);
+    };
+
+    const handleSelectNextColumn = () => {
+        if (!columns.length) {
+            return;
+        }
+
+        const currentIndex = columns.findIndex(
+            (column) => column.id === activeMobileColumnId,
+        );
+        const safeIndex = currentIndex >= 0 ? currentIndex : 0;
+        const nextIndex = safeIndex >= columns.length - 1 ? 0 : safeIndex + 1;
+
+        setActiveMobileColumnId(columns[nextIndex].id);
     };
 
     const allTaskCommands = columns.flatMap((column) =>
@@ -104,6 +184,13 @@ const BoardView = ({
                 action: () => runPaletteCommand(onExportCsv),
             },
             {
+                id: "open-export",
+                label: "Open export options",
+                group: "Export",
+                description: "Choose JSON or CSV and review the estimated size",
+                action: () => runPaletteCommand(handleOpenExportModal),
+            },
+            {
                 id: "restore-board",
                 label: "Restore starter board",
                 group: "Board",
@@ -114,6 +201,48 @@ const BoardView = ({
         ],
         [allTaskCommands, onExportCsv, onExportJson, onRestoreDefaultBoard],
     );
+
+    useEffect(() => {
+        if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+            return undefined;
+        }
+
+        const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
+        const handleMediaQueryChange = (event) => {
+            setIsMobileLayout(event.matches);
+        };
+
+        setIsMobileLayout(mediaQuery.matches);
+
+        if (typeof mediaQuery.addEventListener === "function") {
+            mediaQuery.addEventListener("change", handleMediaQueryChange);
+
+            return () => {
+                mediaQuery.removeEventListener("change", handleMediaQueryChange);
+            };
+        }
+
+        mediaQuery.addListener(handleMediaQueryChange);
+
+        return () => {
+            mediaQuery.removeListener(handleMediaQueryChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!columns.length) {
+            setActiveMobileColumnId(null);
+            return;
+        }
+
+        setActiveMobileColumnId((currentColumnId) => {
+            if (columns.some((column) => column.id === currentColumnId)) {
+                return currentColumnId;
+            }
+
+            return columns[0].id;
+        });
+    }, [columns]);
 
     const filteredCommands = useMemo(() => {
         const nextQuery = commandQuery.trim().toLowerCase();
@@ -151,9 +280,17 @@ const BoardView = ({
                 setIsCommandPaletteOpen((currentValue) => !currentValue);
             }
 
+            if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
+                if (toast?.previousColumns) {
+                    event.preventDefault();
+                    onUndoToast();
+                }
+            }
+
             if (event.key === "Escape") {
                 setIsCommandPaletteOpen(false);
                 setCommandQuery("");
+                closeExportModal();
             }
         };
 
@@ -162,7 +299,7 @@ const BoardView = ({
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, []);
+    }, [onUndoToast, toast]);
 
     const handleSubmitFirstCommand = () => {
         if (filteredCommands.length === 0) {
@@ -195,6 +332,23 @@ const BoardView = ({
     return (
         <>
             <section className="board-shell">
+                {isMobileLayout && (
+                    <div className="mobile-board-header">
+                        <div className="mobile-header-brand">
+                            <span className="mobile-header-title">ProjectFlow</span>
+                            <span className="mobile-header-caption">Focused delivery</span>
+                        </div>
+                        <button
+                            aria-label="Open quick actions"
+                            className="action-button subtle-button mobile-search-button"
+                            onClick={() => setIsCommandPaletteOpen(true)}
+                            type="button"
+                        >
+                            ⌕
+                        </button>
+                    </div>
+                )}
+
                 <div className="board-hero">
                     <div className="board-hero-copy">
                         <p className="board-eyebrow">Focused delivery workspace</p>
@@ -302,18 +456,11 @@ const BoardView = ({
                                 Open palette
                             </button>
                             <button
-                                className="action-button subtle-button"
-                                onClick={onExportJson}
-                                type="button"
-                            >
-                                Export JSON
-                            </button>
-                            <button
                                 className="action-button primary-button"
-                                onClick={onExportCsv}
+                                onClick={handleOpenExportModal}
                                 type="button"
                             >
-                                Export CSV
+                                Export options
                             </button>
                         </div>
                     </div>
@@ -331,6 +478,54 @@ const BoardView = ({
                                 scrolls horizontally to preserve each lane.
                             </p>
                         </div>
+
+                        {isMobileLayout && hasColumns && (
+                            <div className="mobile-lane-shell">
+                                <p className="mobile-lane-label">Current lane</p>
+                                <div
+                                    className="mobile-lane-nav"
+                                    aria-label="Mobile lane navigation"
+                                >
+                                <button
+                                    className="action-button subtle-button mobile-lane-step"
+                                    onClick={handleSelectPreviousColumn}
+                                    type="button"
+                                >
+                                    Prev
+                                </button>
+                                <div className="mobile-lane-tabs" role="tablist">
+                                    {columns.map((column) => (
+                                        <button
+                                            aria-selected={column.id === activeMobileColumnId}
+                                            className={`mobile-lane-tab ${
+                                                column.id === activeMobileColumnId
+                                                    ? "is-active"
+                                                    : ""
+                                            }`}
+                                            key={column.id}
+                                            onClick={() =>
+                                                setActiveMobileColumnId(column.id)
+                                            }
+                                            role="tab"
+                                            type="button"
+                                        >
+                                            <span>{column.title}</span>
+                                            <span className="mobile-lane-count">
+                                                {column.tasks.length}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <button
+                                    className="action-button subtle-button mobile-lane-step"
+                                    onClick={handleSelectNextColumn}
+                                    type="button"
+                                >
+                                    Next
+                                </button>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="board-scroll-area">
                             {!hasColumns ? (
@@ -377,12 +572,24 @@ const BoardView = ({
                                         </div>
                                     )}
 
-                                    <div className="kanban-board">
+                                    <div
+                                        className={`kanban-board ${
+                                            isMobileLayout ? "mobile-focused-board" : ""
+                                        }`.trim()}
+                                    >
                                         {columns.map((column) => (
                                             <ColumnView
                                                 {...column}
+                                                className={
+                                                    isMobileLayout
+                                                        ? column.id === activeMobileColumnId
+                                                            ? "mobile-column-active"
+                                                            : "mobile-column-hidden"
+                                                        : ""
+                                                }
                                                 key={column.id}
                                                 canDeleteColumn={columns.length > 1}
+                                                onClearColumn={onRequestClearColumn}
                                                 onDeleteColumn={onRequestDeleteColumn}
                                                 onRenameColumn={onRenameColumn}
                                                 onOpenTaskDetails={onOpenTaskDetails}
@@ -433,6 +640,122 @@ const BoardView = ({
                 </div>
             )}
 
+            {columnPendingClear && (
+                <div className="modal-overlay" role="presentation">
+                    <div
+                        aria-labelledby="clear-column-title"
+                        aria-modal="true"
+                        className="confirmation-modal"
+                        role="dialog"
+                    >
+                        <h2 id="clear-column-title">
+                            Clear tasks from {columnPendingClear.title}?
+                        </h2>
+                        <p>
+                            This action will remove all cards from the column
+                            ({columnPendingClear.taskCount}) but keep the lane in place.
+                        </p>
+                        <div className="modal-actions">
+                            <button
+                                className="action-button"
+                                onClick={onCloseClearModal}
+                                type="button"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="action-button danger-button"
+                                onClick={onConfirmClearColumn}
+                                type="button"
+                            >
+                                Clear tasks
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isExportModalOpen && (
+                <div className="modal-overlay" role="presentation">
+                    <div
+                        aria-labelledby="export-board-title"
+                        aria-modal="true"
+                        className="export-modal"
+                        role="dialog"
+                    >
+                        <div className="export-modal-header">
+                            <div>
+                                <p className="board-eyebrow">Data portability</p>
+                                <h2 id="export-board-title">Export board</h2>
+                                <p className="export-modal-copy">
+                                    Download a backup of your columns, tasks and metadata.
+                                </p>
+                            </div>
+                            <button
+                                aria-label="Close export modal"
+                                className="action-button subtle-button"
+                                onClick={closeExportModal}
+                                type="button"
+                            >
+                                Close
+                            </button>
+                        </div>
+
+                        <div className="export-format-list">
+                            <button
+                                aria-pressed={selectedExportFormat === "json"}
+                                className={`export-format-card ${
+                                    selectedExportFormat === "json" ? "is-active" : ""
+                                }`}
+                                onClick={() => setSelectedExportFormat("json")}
+                                type="button"
+                            >
+                                <strong>Complete backup (JSON)</strong>
+                                <span>
+                                    Keeps the full structure, including labels, priority and
+                                    subtasks.
+                                </span>
+                            </button>
+                            <button
+                                aria-pressed={selectedExportFormat === "csv"}
+                                className={`export-format-card ${
+                                    selectedExportFormat === "csv" ? "is-active" : ""
+                                }`}
+                                onClick={() => setSelectedExportFormat("csv")}
+                                type="button"
+                            >
+                                <strong>Table format (CSV)</strong>
+                                <span>
+                                    Flattens tasks and metadata into a spreadsheet-friendly file.
+                                </span>
+                            </button>
+                        </div>
+
+                        <div className="export-modal-footer">
+                            <span className="export-size-note">
+                                Estimated size: {estimatedExportSize}
+                            </span>
+                            <div className="modal-actions export-modal-actions">
+                                <button
+                                    className="action-button subtle-button"
+                                    onClick={closeExportModal}
+                                    type="button"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="action-button primary-button"
+                                    onClick={handleSubmitExport}
+                                    type="button"
+                                >
+                                    Download {selectedExportFormat.toUpperCase()}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {selectedTask && (
                 <TaskDetailDrawer
                     task={selectedTask}
@@ -456,7 +779,7 @@ const BoardView = ({
 
             {toast && (
                 <div className="toast-region" aria-live="polite" aria-atomic="true">
-                    <div className="toast-card" role="status">
+                    <div className={`toast-card toast-${toast.type || "info"}`} role="status">
                         <p className="toast-message">{toast.message}</p>
                         <div className="toast-actions">
                             {toast.previousColumns && (
@@ -465,8 +788,11 @@ const BoardView = ({
                                     onClick={onUndoToast}
                                     type="button"
                                 >
-                                    Undo
+                                    {toast.actionLabel || "Undo"}
                                 </button>
+                            )}
+                            {toast.shortcutHint && (
+                                <span className="toast-shortcut">{toast.shortcutHint}</span>
                             )}
                             <button
                                 aria-label="Dismiss notification"
@@ -479,6 +805,17 @@ const BoardView = ({
                         </div>
                     </div>
                 </div>
+            )}
+
+            {isMobileLayout && (
+                <button
+                    aria-label="Quick add task"
+                    className="mobile-fab"
+                    onClick={focusTaskComposer}
+                    type="button"
+                >
+                    +
+                </button>
             )}
         </>
     );

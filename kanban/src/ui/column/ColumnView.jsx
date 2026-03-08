@@ -7,19 +7,30 @@ const ColumnView = ({
     id,
     title,
     tasks,
+    className = "",
     onUpdateTask,
     onDeleteTask,
     onOpenTaskDetails,
     onRenameColumn,
     onDeleteColumn,
+    onClearColumn,
     canDeleteColumn,
 }) => {
     const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
     const [editedTitle, setEditedTitle] = useState(title);
 
     useEffect(() => {
         setEditedTitle(title);
     }, [title]);
+
+    useEffect(() => {
+        if (!isEditingTitle) {
+            return;
+        }
+
+        setIsActionsMenuOpen(false);
+    }, [isEditingTitle]);
 
     const handleSaveTitle = () => {
         const didSave = onRenameColumn(id, editedTitle);
@@ -34,8 +45,23 @@ const ColumnView = ({
         setIsEditingTitle(false);
     };
 
+    const handleOpenRename = () => {
+        setIsActionsMenuOpen(false);
+        setIsEditingTitle(true);
+    };
+
+    const handleClearColumn = () => {
+        setIsActionsMenuOpen(false);
+        onClearColumn(id);
+    };
+
+    const handleDeleteColumn = () => {
+        setIsActionsMenuOpen(false);
+        onDeleteColumn(id);
+    };
+
     return (
-        <div className="column">
+        <div className={`column ${className}`.trim()}>
             <div className="column-header">
                 {isEditingTitle ? (
                     <div className="column-title-editor">
@@ -88,22 +114,54 @@ const ColumnView = ({
                             </h2>
                             <div className="column-actions">
                                 <button
-                                    aria-label={`Edit column ${title}`}
+                                    aria-expanded={isActionsMenuOpen}
+                                    aria-haspopup="menu"
+                                    aria-label={`Open actions for column ${title}`}
                                     className="action-button subtle-button"
-                                    onClick={() => setIsEditingTitle(true)}
+                                    onClick={() =>
+                                        setIsActionsMenuOpen((currentValue) => !currentValue)
+                                    }
                                     type="button"
                                 >
-                                    Edit
+                                    ···
                                 </button>
-                                <button
-                                    aria-label={`Delete column ${title}`}
-                                    className="action-button danger-button"
-                                    disabled={!canDeleteColumn}
-                                    onClick={() => onDeleteColumn(id)}
-                                    type="button"
-                                >
-                                    Delete
-                                </button>
+                                {isActionsMenuOpen && (
+                                    <div
+                                        aria-label={`Column actions for ${title}`}
+                                        className="column-actions-menu"
+                                        role="menu"
+                                    >
+                                        <button
+                                            aria-label={`Edit column ${title}`}
+                                            className="column-action-item is-active"
+                                            onClick={handleOpenRename}
+                                            role="menuitem"
+                                            type="button"
+                                        >
+                                            Rename column
+                                        </button>
+                                        <button
+                                            aria-label={`Clear tasks from column ${title}`}
+                                            className="column-action-item"
+                                            disabled={tasks.length === 0}
+                                            onClick={handleClearColumn}
+                                            role="menuitem"
+                                            type="button"
+                                        >
+                                            Clear tasks
+                                        </button>
+                                        <button
+                                            aria-label={`Delete column ${title}`}
+                                            className="column-action-item is-danger"
+                                            disabled={!canDeleteColumn}
+                                            onClick={handleDeleteColumn}
+                                            role="menuitem"
+                                            type="button"
+                                        >
+                                            Delete column
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <p className="column-summary">

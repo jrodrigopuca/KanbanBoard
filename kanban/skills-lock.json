@@ -1,11 +1,6 @@
 {
   "version": 1,
   "skills": {
-    "create-software-docs": {
-      "source": "jrodrigopuca/skills",
-      "sourceType": "github",
-      "computedHash": "2918e7d781e467800d3a7b2f899f859f243c6582182b02419abe9f6f46200953"
-    },
     "systematic-debugging": {
       "source": "obra/superpowers",
       "sourceType": "github",

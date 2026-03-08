@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Draggable } from "@hello-pangea/dnd";
 import {
+    STORY_POINTS,
     getDefaultStoryPoints,
     getNextStoryPoints,
 } from "../../domain/services/storyPoints";
@@ -28,17 +29,27 @@ const TaskCard = ({
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedContent, setEditedContent] = useState(title);
+    const [isPointsSelectorOpen, setIsPointsSelectorOpen] = useState(false);
 
     const handleDelete = () => {
         onDelete(id);
     };
 
     const handleChangePoints = (direction = "increase") => {
+        setIsPointsSelectorOpen(false);
         onEdit(id, {
             points: getNextStoryPoints({
                 currentPoints: points,
                 direction,
             }),
+        });
+    };
+
+    const handleSelectPoints = (nextPoints) => {
+        setIsPointsSelectorOpen(false);
+        onEdit(id, {
+            points: nextPoints,
+            date: Date.now(),
         });
     };
 
@@ -96,10 +107,49 @@ const TaskCard = ({
                                 >
                                     {getPriorityLabel(taskPriority)}
                                 </span>
-                                <div className="task-points" title="Story points">
+                                <button
+                                    aria-expanded={isPointsSelectorOpen}
+                                    aria-haspopup="dialog"
+                                    aria-label={`Story points for ${title}`}
+                                    className="task-points task-points-trigger"
+                                    onClick={() =>
+                                        setIsPointsSelectorOpen(
+                                            (currentValue) => !currentValue,
+                                        )
+                                    }
+                                    title="Story points"
+                                    type="button"
+                                >
                                     {pointsToShow}
-                                </div>
+                                </button>
                             </div>
+
+                            {isPointsSelectorOpen && (
+                                <div className="task-points-popover" role="dialog">
+                                    <p className="task-points-popover-label">
+                                        Estimate (points)
+                                    </p>
+                                    <div className="task-points-options">
+                                        {STORY_POINTS.map((storyPoint) => (
+                                            <button
+                                                aria-label={`Set ${storyPoint} story points for ${title}`}
+                                                className={`task-points-option ${
+                                                    storyPoint === pointsToShow
+                                                        ? "is-selected"
+                                                        : ""
+                                                }`}
+                                                key={storyPoint}
+                                                onClick={() =>
+                                                    handleSelectPoints(storyPoint)
+                                                }
+                                                type="button"
+                                            >
+                                                {storyPoint}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <p className="task-title">{title}</p>
                             {taskLabels.length > 0 && (

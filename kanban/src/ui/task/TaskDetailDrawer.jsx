@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createSubtaskModel } from "../../domain/models/subtask";
 import {
+    STORY_POINTS,
     getDefaultStoryPoints,
     getNextStoryPoints,
 } from "../../domain/services/storyPoints";
@@ -56,6 +57,13 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                 currentPoints: task.points,
                 direction,
             }),
+            date: Date.now(),
+        });
+    };
+
+    const handleSelectPoints = (nextPoints) => {
+        onSaveTask(task.id, {
+            points: nextPoints,
             date: Date.now(),
         });
     };
@@ -264,6 +272,21 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
 
                 <div className="task-drawer-section">
                     <p className="board-eyebrow">Estimate</p>
+                    <div className="task-drawer-points-grid">
+                        {STORY_POINTS.map((storyPoint) => (
+                            <button
+                                aria-label={`Set ${storyPoint} story points for ${task.title}`}
+                                className={`action-button task-points-option ${
+                                    storyPoint === pointsToShow ? "is-selected" : ""
+                                }`}
+                                key={storyPoint}
+                                onClick={() => handleSelectPoints(storyPoint)}
+                                type="button"
+                            >
+                                {storyPoint}
+                            </button>
+                        ))}
+                    </div>
                     <div className="task-drawer-actions">
                         <button
                             aria-label={`Decrease story points for ${task.title}`}

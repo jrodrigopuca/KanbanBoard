@@ -115,6 +115,8 @@ De [design/007.svg](../design/007.svg):
 De [design/008.svg](../design/008.svg):
 
 - estado vacío sin columnas ni tareas
+- se debe permitir eliminar cada columna (para poder ver el empty state)
+- deberá ser el estado inicial del tablero
 - CTA para crear primer tablero
 - acceso desde shortcut a comandos
 
@@ -182,6 +184,40 @@ De [design/008.svg](../design/008.svg) y [design/012.svg](../design/012.svg):
 - exportación JSON/CSV
 - notificaciones con undo
 - navegación móvil por columna activa
+
+## Implementation verification review — 2026-03-07
+
+Se realizó una revisión del estado real de la implementación contra los SVG de `design/` y el alcance funcional definido para `BF-002`.
+
+### Result summary
+
+| Capability                          | Status          | Notes                                                                                                                                                             |
+| ----------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Board renovado (`001`, `006`)       | **Implemented** | El board actual ya expone contador por columna, metadata visual, labels, prioridad y estados visuales de drag & drop.                                             |
+| Crear / editar tarea (`002`)        | **Implemented** | Existen alta rápida con Enter y edición ampliada desde drawer con descripción, etiquetas y prioridad.                                                             |
+| Crear / editar columna (`003`)      | **Implemented** | La columna puede crearse y renombrarse inline; además hay copy para estados vacíos de lane.                                                                       |
+| Menú de acciones de columna (`004`) | **Implemented** | La columna ya expone `rename`, `clear` y `delete` mediante un menú contextual tipo popover alineado a la intención del SVG.                                       |
+| Detalle de tarea (`005`)            | **Implemented** | El drawer lateral permite editar título, descripción, prioridad, labels, subtasks y story points.                                                                 |
+| Paleta de comandos (`007`)          | **Partial**     | Hay búsqueda global, atajo `⌘K` / `Ctrl+K`, navegación con teclado y apertura de tareas; no existe una sección explícita de tareas recientes.                     |
+| Empty states (`008`)                | **Partial**     | El dominio tolera tablero vacío y la UI muestra empty states con CTA; sin embargo el estado inicial sigue siendo un tablero por defecto, no vacío.                |
+| Story points mejorados (`009`)      | **Implemented** | La regla Fibonacci ya está desacoplada y existe selector directo de puntos en drawer, además de un selector rápido desde la card.                                 |
+| Responsive real (`010`)             | **Implemented** | La UI móvil ya expone header dedicado, lane switcher por columna activa, columna enfocada única y FAB de alta rápida, alineándose con la intención del SVG móvil. |
+| Exportación (`011`)                 | **Implemented** | JSON y CSV están implementados con modal de elección y tamaño estimado.                                                                                           |
+| Notificaciones y undo (`012`)       | **Partial**     | Existen variantes semánticas visuales e hint de `⌘Z`, pero siguen faltando flujos explícitos de error reales y una capa desacoplada de notificaciones.            |
+
+### Verified evidence in code
+
+- `Task` ya incorpora `description`, `priority`, `labels` y `subtasks` en [kanban/src/domain/models/task.js](../kanban/src/domain/models/task.js).
+- El drawer de detalle está implementado en [kanban/src/ui/task/TaskDetailDrawer.jsx](../kanban/src/ui/task/TaskDetailDrawer.jsx).
+- La paleta de comandos vive en [kanban/src/ui/board/CommandPalette.jsx](../kanban/src/ui/board/CommandPalette.jsx) y se orquesta desde [kanban/src/ui/board/BoardView.jsx](../kanban/src/ui/board/BoardView.jsx).
+- `Vaciar tareas` ya existe como caso de uso en [kanban/src/application/use-cases/clearColumnTasks.js](../kanban/src/application/use-cases/clearColumnTasks.js) y se expone desde la UI de columna.
+- La exportación JSON/CSV se resuelve en [kanban/src/application/use-cases/exportBoard.js](../kanban/src/application/use-cases/exportBoard.js) y [kanban/src/ui/board/useBoardViewModel.js](../kanban/src/ui/board/useBoardViewModel.js).
+- Los toasts y el undo hoy siguen controlados desde [kanban/src/ui/board/useBoardViewModel.js](../kanban/src/ui/board/useBoardViewModel.js), no desde una infraestructura de notificaciones desacoplada.
+- La adaptación responsive actual depende sobre todo de [kanban/src/ui/shared/board.css](../kanban/src/ui/shared/board.css) y [kanban/src/ui/board/BoardView.jsx](../kanban/src/ui/board/BoardView.jsx), ahora con header móvil dedicado, lane switcher por columna activa, columna enfocada y FAB de alta rápida.
+
+### Main remaining gaps against the design set
+
+1. Las notificaciones ya tienen variantes visuales y undo, pero siguen acopladas al view model y no cubren todavía flujos de error reales equivalentes a [design/012.svg](../design/012.svg).
 
 ## Impact on domain model
 

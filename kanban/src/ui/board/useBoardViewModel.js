@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createColumn } from "../../application/use-cases/createColumn";
+import { clearColumnTasks } from "../../application/use-cases/clearColumnTasks";
 import { createTask } from "../../application/use-cases/createTask";
 import { deleteColumn } from "../../application/use-cases/deleteColumn";
 import { deleteTask } from "../../application/use-cases/deleteTask";
@@ -35,6 +36,7 @@ export const useBoardViewModel = () => {
     const [newColumnInput, setNewColumnInput] = useState("");
     const [newTaskInput, setNewTaskInput] = useState("");
     const [columnPendingDelete, setColumnPendingDelete] = useState(null);
+    const [columnPendingClear, setColumnPendingClear] = useState(null);
     const [selectedTaskId, setSelectedTaskId] = useState(null);
     const [toast, setToast] = useState(null);
 
@@ -55,11 +57,20 @@ export const useBoardViewModel = () => {
         );
     };
 
-    const showToast = ({ message, previousColumns = null }) => {
+    const showToast = ({
+        message,
+        previousColumns = null,
+        type = "info",
+        actionLabel = null,
+        shortcutHint = null,
+    }) => {
         setToast({
             id: Date.now(),
             message,
             previousColumns,
+            type,
+            actionLabel,
+            shortcutHint,
         });
     };
 
@@ -79,6 +90,9 @@ export const useBoardViewModel = () => {
             showToast({
                 message: `Task ${taskToDelete.title} deleted.`,
                 previousColumns: columns,
+                type: "danger",
+                actionLabel: "Undo",
+                shortcutHint: "⌘Z",
             });
         }
 
@@ -156,8 +170,26 @@ export const useBoardViewModel = () => {
         });
     };
 
+    const handleRequestClearColumn = (columnId) => {
+        const columnToClear = columns.find((column) => column.id === columnId);
+
+        if (!columnToClear || columnToClear.tasks.length === 0) {
+            return;
+        }
+
+        setColumnPendingClear({
+            id: columnToClear.id,
+            title: columnToClear.title,
+            taskCount: columnToClear.tasks.length,
+        });
+    };
+
     const handleCloseDeleteModal = () => {
         setColumnPendingDelete(null);
+    };
+
+    const handleCloseClearModal = () => {
+        setColumnPendingClear(null);
     };
 
     const handleConfirmDeleteColumn = () => {
@@ -181,6 +213,37 @@ export const useBoardViewModel = () => {
             showToast({
                 message: `Column ${deletedColumn.title} deleted.`,
                 previousColumns: columns,
+                type: "danger",
+                actionLabel: "Undo",
+                shortcutHint: "⌘Z",
+            });
+        }
+    };
+
+    const handleConfirmClearColumn = () => {
+        if (!columnPendingClear) {
+            return;
+        }
+
+        const clearedColumn = columns.find(
+            (column) => column.id === columnPendingClear.id,
+        );
+
+        setColumns(
+            clearColumnTasks({
+                columns,
+                columnId: columnPendingClear.id,
+            }),
+        );
+        setColumnPendingClear(null);
+
+        if (clearedColumn) {
+            showToast({
+                message: `Column ${clearedColumn.title} cleared.`,
+                previousColumns: columns,
+                type: "info",
+                actionLabel: "Undo",
+                shortcutHint: "⌘Z",
             });
         }
     };
@@ -188,8 +251,12 @@ export const useBoardViewModel = () => {
     const handleRestoreDefaultBoard = () => {
         setColumns(createInitialColumns());
         setColumnPendingDelete(null);
+        setColumnPendingClear(null);
         setSelectedTaskId(null);
-        setToast(null);
+        showToast({
+            message: "Starter board restored.",
+            type: "success",
+        });
     };
 
     const handleOpenTaskDetails = (taskId) => {
@@ -209,6 +276,7 @@ export const useBoardViewModel = () => {
 
         showToast({
             message: "Board exported as JSON.",
+            type: "success",
         });
     };
 
@@ -221,6 +289,7 @@ export const useBoardViewModel = () => {
 
         showToast({
             message: "Board exported as CSV.",
+            type: "success",
         });
     };
 
@@ -253,6 +322,7 @@ export const useBoardViewModel = () => {
         newColumnInput,
         newTaskInput,
         columnPendingDelete,
+        columnPendingClear,
         selectedTask,
         toast,
         setNewColumnInput,
@@ -264,8 +334,11 @@ export const useBoardViewModel = () => {
         handleAddColumn,
         handleRenameColumn,
         handleRequestDeleteColumn,
+        handleRequestClearColumn,
         handleCloseDeleteModal,
         handleConfirmDeleteColumn,
+        handleCloseClearModal,
+        handleConfirmClearColumn,
         handleRestoreDefaultBoard,
         handleOpenTaskDetails,
         handleCloseTaskDetails,

@@ -10,8 +10,12 @@ test("renders the kanban board title and default columns", () => {
     render(<App />);
 
     expect(screen.getByText(/kanban board/i)).toBeInTheDocument();
-    expect(screen.getByText(/to do/i)).toBeInTheDocument();
-    expect(screen.getByText(/progress/i)).toBeInTheDocument();
+    expect(
+        screen.getByRole("button", { name: /open actions for column to do/i }),
+    ).toBeInTheDocument();
+    expect(
+        screen.getByRole("heading", { name: /progress \(0\)/i }),
+    ).toBeInTheDocument();
 });
 
 test("falls back to default columns when persisted data is invalid", () => {
@@ -25,7 +29,9 @@ test("falls back to default columns when persisted data is invalid", () => {
 
     expect(consoleErrorSpy).toHaveBeenCalled();
     expect(screen.getByText(/kanban board/i)).toBeInTheDocument();
-    expect(screen.getByText(/done/i)).toBeInTheDocument();
+    expect(
+        screen.getByRole("heading", { name: /done \(0\)/i }),
+    ).toBeInTheDocument();
 
     consoleErrorSpy.mockRestore();
 });
@@ -139,8 +145,14 @@ test("exports board data as json and csv", async () => {
 
     render(<App />);
 
-    fireEvent.click(screen.getByRole("button", { name: /export json/i }));
-    fireEvent.click(screen.getByRole("button", { name: /export csv/i }));
+    fireEvent.click(screen.getByRole("button", { name: /export options/i }));
+    fireEvent.click(screen.getByRole("button", { name: /download json/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /export options/i }));
+    fireEvent.click(
+        screen.getByRole("button", { name: /table format \(csv\)/i }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /download csv/i }));
 
     expect(createObjectURL).toHaveBeenCalledTimes(2);
     expect(clickSpy).toHaveBeenCalledTimes(2);
@@ -173,6 +185,38 @@ test("shows undo toast after deleting a task and restores it", async () => {
 
     expect(await screen.findByText(/^hello$/i)).toBeInTheDocument();
     expect(screen.queryByText(/task hello deleted\./i)).not.toBeInTheDocument();
+});
+
+test("clears a column with confirmation and can undo it", async () => {
+    render(<App />);
+
+    fireEvent.click(
+        screen.getByRole("button", { name: /open actions for column to do/i }),
+    );
+    fireEvent.click(
+        screen.getByRole("menuitem", {
+            name: /clear tasks from column to do/i,
+        }),
+    );
+
+    expect(
+        await screen.findByRole("dialog", {
+            name: /clear tasks from to do\?/i,
+        }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^clear tasks$/i }));
+
+    expect(screen.queryByText(/^hello$/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^world$/i)).not.toBeInTheDocument();
+    expect(
+        await screen.findByText(/column to do cleared\./i),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /undo/i }));
+
+    expect(await screen.findByText(/^hello$/i)).toBeInTheDocument();
+    expect(await screen.findByText(/^world$/i)).toBeInTheDocument();
 });
 
 test("opens command palette and runs commands", async () => {
@@ -266,10 +310,28 @@ test("navigates command palette with arrow keys and enter", async () => {
     ).not.toBeInTheDocument();
 });
 
+test("opens the story point selector and applies a direct estimate", async () => {
+    render(<App />);
+
+    fireEvent.click(
+        screen.getByRole("button", { name: /^story points for hello$/i }),
+    );
+    fireEvent.click(
+        screen.getByRole("button", { name: /set 8 story points for hello/i }),
+    );
+
+    expect(await screen.findByText(/^8$/i)).toBeInTheDocument();
+});
+
 test("renames a column from the column actions", async () => {
     render(<App />);
 
-    fireEvent.click(screen.getByRole("button", { name: /edit column to do/i }));
+    fireEvent.click(
+        screen.getByRole("button", { name: /open actions for column to do/i }),
+    );
+    fireEvent.click(
+        screen.getByRole("menuitem", { name: /edit column to do/i }),
+    );
     const input = await screen.findByRole("textbox", {
         name: /edit title for to do/i,
     });
@@ -286,7 +348,10 @@ test("confirms before deleting a column and removes its cards", async () => {
     render(<App />);
 
     fireEvent.click(
-        screen.getByRole("button", { name: /delete column to do/i }),
+        screen.getByRole("button", { name: /open actions for column to do/i }),
+    );
+    fireEvent.click(
+        screen.getByRole("menuitem", { name: /delete column to do/i }),
     );
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument();

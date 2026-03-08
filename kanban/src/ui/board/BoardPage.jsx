@@ -10,6 +10,7 @@ const BoardPage = () => {
             newColumnInput={viewModel.newColumnInput}
             newTaskInput={viewModel.newTaskInput}
             columnPendingDelete={viewModel.columnPendingDelete}
+            columnPendingClear={viewModel.columnPendingClear}
             selectedTask={viewModel.selectedTask}
             toast={viewModel.toast}
             setNewColumnInput={viewModel.setNewColumnInput}
@@ -21,8 +22,11 @@ const BoardPage = () => {
             onAddColumn={viewModel.handleAddColumn}
             onRenameColumn={viewModel.handleRenameColumn}
             onRequestDeleteColumn={viewModel.handleRequestDeleteColumn}
+            onRequestClearColumn={viewModel.handleRequestClearColumn}
             onCloseDeleteModal={viewModel.handleCloseDeleteModal}
             onConfirmDeleteColumn={viewModel.handleConfirmDeleteColumn}
+            onCloseClearModal={viewModel.handleCloseClearModal}
+            onConfirmClearColumn={viewModel.handleConfirmClearColumn}
             onRestoreDefaultBoard={viewModel.handleRestoreDefaultBoard}
             onOpenTaskDetails={viewModel.handleOpenTaskDetails}
             onCloseTaskDetails={viewModel.handleCloseTaskDetails}

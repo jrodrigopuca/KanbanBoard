@@ -598,3 +598,226 @@ Mover tareas entre columnas es la operación fundamental de un tablero Kanban. S
 - Los botones de movimiento rápido usan CSS `display: none` por defecto y `display: flex` dentro de `@media (max-width: 720px)` para evitar lógica JS adicional
 - El handler reutiliza el caso de uso `moveTask` existente construyendo un `result` equivalente al de drag & drop
 - `npm run build` pasa correctamente tras la implementación
+
+---
+
+### BF-008: Segunda revisión de consistencia UI/UX
+
+- Type: `feature`
+- Status: `candidate`
+- Priority: `high`
+- Affects: `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/board/CommandPalette.jsx`, `kanban/src/ui/column/ColumnView.jsx`, `kanban/src/ui/task/TaskCard.jsx`, `kanban/src/ui/task/TaskDetailDrawer.jsx`, `kanban/src/ui/shared/board.css`
+
+**Summary**
+
+Segunda pasada de revisión UI/UX sobre el estado actual de la aplicación (post BF-006 y BF-007). Se detectaron nuevas inconsistencias acumuladas, gaps de accesibilidad, problemas de información arquitectural del layout, y oportunidades de mejora de affordance que no quedaron cubiertas en la iteración anterior.
+
+**Why it matters**
+
+La aplicación tiene un buen nivel de acabado visual pero acumula fricciones concretas de interacción: jerarquía de información confusa en el hero, affordance débil en la command palette, ausencia de estados de carga/feedback en acciones asíncronas, y patrones de accesibilidad incompletos que afectan a usuarios de teclado y lectores de pantalla.
+
+**Current evidence**
+
+A continuación se documentan las inconsistencias detectadas, agrupadas por categoría.
+
+---
+
+#### A — Arquitectura de información y jerarquía visual
+
+**A.1 — El hero del board ocupa demasiado espacio vertical para ser información de primer nivel**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/shared/board.css`
+- El `board-hero` contiene un eyebrow, un `<h1>` con `clamp(2.4rem, 5vw, 3.5rem)`, un subtítulo descriptivo y tres stat cards. Es la primera región visible y ocupa aproximadamente 200–280px de altura dependiendo del viewport.
+- En una herramienta de gestión de trabajo, la información operativa (las columnas con las tareas) debería ser el foco inmediato. El hero con branding y descripción estática funciona bien en una landing page pero introduce ruido en una app de productividad de uso diario.
+- Las stat cards (Columns, Cards, Active lanes) repiten información fácilmente inferible del propio tablero sin agregar análisis ni contexto accionable.
+- **Corrección sugerida**: colapsar el hero en un header compacto (una línea con título, stats en línea, y botón de exportación/command palette). Liberar el espacio visual para que el tablero sea el protagonista inmediato. Opcionalmente, mover las stat cards a un panel colapsable o integrarlas como badges del header.
+
+**A.2 — El toolbar de tres cards (Create task / Create column / Export board) impone scroll antes de ver el tablero**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/shared/board.css`
+- Sumando el hero y el toolbar, el usuario debe hacer scroll antes de ver una sola columna en pantallas de altura estándar (≤900px).
+- La card "Create task" y "Create column" son formas de creación principales, no información. Ocupan una superficie de `composer-card` completa con título, descripción y preview cuando el patrón estándar (GitHub, Linear, Jira) es un botón `+ Add card` inline dentro de la columna o un input al final de la lista.
+- La card "Export board" es una acción de bajo uso frecuente que compite en jerarquía visual con las acciones de creación principales.
+- **Corrección sugerida**: 
+  - Mover "Create task" a un botón inline en la primera columna (o un FAB que ya existe en mobile).
+  - Mover "Create column" a un botón `+ Add column` al final del rail de columnas, patrón estándar de Trello/Linear/GitHub Projects.
+  - Mover "Export board" al header compacto o exclusivamente a la command palette.
+  - El toolbar actual podría eliminarse completamente si estas acciones se integran contextualmente.
+
+**A.3 — `column-summary` muestra texto genérico sin valor informativo**
+
+- Archivo: `kanban/src/ui/column/ColumnView.jsx`
+- Cada columna muestra:
+  - Con tareas: `"Keep cards moving across the workflow."`
+  - Sin tareas: `"No cards yet. Add one to get this lane started."`
+- El primer texto es un copy motivacional que no aporta información. El segundo es útil como empty state pero está siempre visible debajo del header aunque haya tareas, lo que lo vuelve redundante.
+- **Corrección sugerida**: eliminar el `column-summary` con texto fijo. El `column-count-badge` ya comunica la cantidad de tareas. El empty state de la columna (cuando `tasks.length === 0`) puede mostrarse inline dentro del `task-list` en vez del header.
+
+---
+
+#### B — Affordance y discoverability
+
+**B.1 — La command palette no tiene hint visible permanente en la UI**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`
+- El shortcut `⌘K`/`Ctrl+K` no está indicado en ningún lugar del UI principal de desktop. El único acceso visible a la palette es el botón `⌕` en mobile.
+- Un usuario que nunca leyó la documentación no descubre la command palette hasta que la activa accidentalmente o la busca.
+- **Corrección sugerida**: agregar un hint visual permanente en el header compacto del board (ej. un botón o badge que diga `⌘K`) que dispare la palette. Patrón estándar en Linear, Vercel dashboard, GitHub.
+
+**B.2 — El botón `···` de acciones de columna no tiene texto ni tooltip descriptivo**
+
+- Archivo: `kanban/src/ui/column/ColumnView.jsx`
+- El botón que abre el menú de acciones usa `···` (tres puntos) como contenido visual con `aria-label="Open actions for column {title}"`. Sin hover tooltip visible, un usuario nuevo no tiene señal visual de qué hace ese botón.
+- En desktop no hay `title` attribute en el botón (el `aria-label` no genera tooltip visible en la mayoría de browsers).
+- **Corrección sugerida**: agregar `title="Column actions"` al botón para mostrar tooltip nativo en desktop, o usar un componente de tooltip custom.
+
+**B.3 — El botón `→` de "Open details" en TaskCard no comunica claramente que abre un drawer**
+
+- Archivo: `kanban/src/ui/task/TaskCard.jsx`
+- El icono `→` mejoró respecto al `+` anterior, pero sigue siendo ambiguo: ¿navega a otra página? ¿expande la card? ¿abre un panel lateral?
+- Las acciones de card (delete `✕`, open details `→`) solo aparecen en hover. En táctil son siempre visibles, lo cual está bien, pero la diferencia de comportamiento entre ambas acciones (destructiva vs. expansión) no está reforzada visualmente más allá del color.
+- **Corrección sugerida**: considerar reemplazar `→` por un icono más explícito de "panel" o "expandir" (ej. `⤢`, `⊡` o un ícono SVG de panel lateral). También considerar añadir `title="Open task details"` al botón.
+
+**B.4 — El input de labels no tiene separador visible ni ejemplo de formato**
+
+- Archivo: `kanban/src/ui/task/TaskDetailDrawer.jsx`
+- El input de labels usa `placeholder="Bug, UI, Backend"` que sugiere coma como separador, pero no hay texto de ayuda que confirme que las comas son el separador real. Si el usuario escribe `Bug UI Backend` sin comas, el resultado será un solo label.
+- **Corrección sugerida**: agregar un `<small>` o `<p>` de ayuda debajo del input que diga "Separate labels with commas" o mostrar un preview dinámico de los labels parseados mientras el usuario escribe (el state `normalizedLabels` ya existe y se muestra más abajo, por lo que el feedback visual solo necesita acercarse al input).
+
+---
+
+#### C — Accesibilidad (a11y)
+
+**C.1 — `role="presentation"` en backdrops debería ser `role="none"` o eliminarse**
+
+- Archivos: `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/task/TaskDetailDrawer.jsx`, `kanban/src/ui/board/CommandPalette.jsx`
+- Los elementos de backdrop usan `role="presentation"`. Según la spec de ARIA, `role="presentation"` en un `<div>` es semánticamente equivalente a `role="none"`. Sin embargo, si el div tiene un handler `onClick`, algunos AT (assistive technologies) pueden reportarlo como un elemento interactivo sin nombre.
+- El patrón correcto para un backdrop de modal es un `<div>` sin role explícito (o con `aria-hidden="true"` si no debe ser accesible), con el foco gestionado dentro del dialog (`role="dialog"` con `aria-modal="true"` ya está bien implementado).
+- **Corrección sugerida**: eliminar `role="presentation"` de los backdrops o reemplazarlo por `aria-hidden="true"`. El dialog interior ya tiene la semántica correcta.
+
+**C.2 — Los modales de confirmación no gestionan el foco al abrirse**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`
+- Los modales `columnPendingDelete` y `columnPendingClear` se montan condicionalmente pero no hacen `focus()` en el botón de confirmación ni en el modal al abrirse.
+- Esto significa que un usuario de teclado que dispara la acción desde el menú de la columna pierde el foco (el menú se desmonta) y el foco queda en el `<body>`.
+- El `TaskDetailDrawer` tiene el mismo problema: el drawer se abre pero el foco no se mueve al interior.
+- **Corrección sugerida**: usar `useEffect` + `ref` para hacer `focus()` en el primer elemento interactivo del modal/drawer al montarse. También implementar focus trap durante la sesión del modal.
+
+**C.3 — `aria-label` del drawer usa "Dismiss" pero el botón dice "Close"**
+
+- Archivo: `kanban/src/ui/task/TaskDetailDrawer.jsx`
+- El botón de cierre del header del drawer tiene `aria-label="Dismiss task details"` pero el texto visible es `Close`. Para lectores de pantalla, el nombre accesible (`aria-label`) debería coincidir o ser consistente con el texto visible (WCAG 2.5.3 Label in Name).
+- **Corrección sugerida**: cambiar `aria-label` a `"Close task details"` para alinear con el texto visible, o eliminar el `aria-label` si el texto visible ya es suficientemente descriptivo en contexto.
+
+**C.4 — Los inputs del drawer no tienen `id` + `htmlFor` explícitos en sus labels**
+
+- Archivo: `kanban/src/ui/task/TaskDetailDrawer.jsx`
+- Los campos del drawer usan `<label>` wrapping (label como padre del input), que es válido. Sin embargo, el `aria-label` redundante en los propios inputs (`aria-label="Task title"`, `aria-label="Task description"`) puede causar que algunos AT ignoren el texto del `<label>` padre y lean solo el `aria-label`.
+- **Corrección sugerida**: eliminar los `aria-label` redundantes en los inputs que ya están correctamente envueltos por un `<label>`, o usar la combinación `id`/`htmlFor` explícita.
+
+---
+
+#### D — Micro-interacciones y feedback visual
+
+**D.1 — No hay feedback visual mientras se arrastra una card al inicio del drag**
+
+- Archivo: `kanban/src/ui/task/TaskCard.jsx`, `kanban/src/ui/shared/board.css`
+- El estado `dragging` en la card aplica `rotate(1deg) scale(1.01)` y un border gradient. El `dragging-over` en la columna destino muestra un background sutil. Sin embargo, no hay ninguna animación de entrada al iniciar el drag (el card simplemente "aparece" con la transformación ya aplicada).
+- **Corrección sugerida**: agregar una transición corta (`transform 0.1s ease`) al inicio del estado `dragging` para que la elevación sea percibida como respuesta física.
+
+**D.2 — Las stat cards del hero no tienen contexto comparativo**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`
+- Las stats muestran `Columns: N`, `Cards: N`, `Active lanes: N`. Estos valores son instantáneos sin tendencia, benchmark ni contexto. `Active lanes` es confusamente similar a `Columns` para un usuario que no lee el código.
+- `Active lanes` = columnas con al menos una tarea, lo cual no es evidente del label.
+- **Corrección sugerida**: o bien clarificar el label (`"Lanes with cards"` en lugar de `"Active lanes"`), o eliminar esta stat si no agrega valor diferencial respecto a las otras dos.
+
+**D.3 — La preview de columna vacía en el `column-composer-card` no cambia con el input**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`
+- El `column-composer-preview` muestra siempre `"Cards will appear here"` sin reflejar el nombre que el usuario está escribiendo en el input.
+- **Corrección sugerida**: mostrar el valor de `newColumnInput` dentro del preview como si fuera el header de la nueva columna, para que el usuario vea una previsualización real antes de confirmar.
+
+**D.4 — El estado `is-primary` en `CommandPalette` siempre aplica al primer item aunque no esté activo**
+
+- Archivo: `kanban/src/ui/board/CommandPalette.jsx`
+- La condición para `is-primary` es `command.id === activeCommandId || index === 0`. Esto significa que el primer item siempre tiene estilos de "activo" incluso cuando el usuario navega con flechas y selecciona otro item.
+- **Corrección sugerida**: eliminar `|| index === 0` de la condición y depender exclusivamente de `activeCommandId`. El estado inicial del índice activo ya comienza en `0`, por lo que el primer item estará activo por defecto al abrir la palette.
+
+---
+
+#### E — Inconsistencias de copy y microcopy
+
+**E.1 — "Delete tasks" en el modal de clear column debería ser "Clear tasks"**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`
+- El modal de limpiar columna tiene título `"Clear tasks from {title}?"` pero el botón de confirmación dice `"Delete tasks"`.
+- La acción es "limpiar" (eliminar todas las tareas de esa columna), pero el copy del botón cambia el frame a "eliminar".
+- **Corrección sugerida**: cambiar el botón a `"Clear tasks"` para mantener coherencia con el título del modal y con la intención de la acción.
+
+**E.2 — "Focused delivery" como subtítulo del header mobile no tiene continuidad con el desktop**
+
+- Archivo: `kanban/src/ui/board/BoardView.jsx`, `kanban/src/ui/shared/board.css`
+- El header mobile muestra `"Focused delivery"` como caption. El hero desktop usa `"Focused delivery workspace"` como eyebrow (ya oculto en mobile con `display: none`). Son variaciones del mismo copy que reflejan iteraciones sin resolución final.
+- **Corrección sugerida**: definir un subtítulo canónico y usarlo consistentemente, o eliminarlo si no aporta valor en ningún viewport.
+
+**E.3 — El botón de crear subtarea dice "Create subtask" pero su equivalente en el composer principal dice "Enter ↵"**
+
+- Archivo: `kanban/src/ui/task/TaskDetailDrawer.jsx`, `kanban/src/ui/board/BoardView.jsx`
+- Las acciones de submit de formularios tienen patrones diferentes:
+  - Task composer: botón `"Enter ↵"` con affordance de atajo de teclado
+  - Column composer: botón `"Enter ↵"` con affordance de atajo de teclado
+  - Subtask composer: botón `"Create subtask"` sin hint de atajo
+- **Corrección sugerida**: unificar el patrón de submit. Si se mantiene el hint de teclado, aplicarlo también al subtask composer (`"Enter ↵"`). Si se prefiere texto descriptivo, aplicarlo también a los composers del board.
+
+---
+
+#### F — Problemas de layout en edge cases
+
+**F.1 — Con muchas columnas y muchos labels, el `task-meta-row` se desborda verticalmente**
+
+- Archivo: `kanban/src/ui/task/TaskCard.jsx`, `kanban/src/ui/shared/board.css`
+- `.task-meta-row` usa `flex-wrap: wrap` con `gap: 6px`. Con una tarea de prioridad `high` + 4–5 labels + progreso de subtareas, la zona de metadata puede expandirse a 3–4 líneas, rompiendo la uniformidad visual de las cards en una misma columna.
+- **Corrección sugerida**: limitar los labels visibles en la card a un máximo (ej. 2–3) y mostrar un overflow badge `+N más`. El detalle completo sigue disponible en el drawer.
+
+**F.2 — El drawer de detalle en mobile ocupa el 100% del ancho y no tiene handle de swipe**
+
+- Archivo: `kanban/src/ui/task/TaskDetailDrawer.jsx`, `kanban/src/ui/shared/board.css`
+- En mobile (`max-width: 720px`) el drawer ocupa `width: 100%` y se cierra solo con el backdrop o el botón "Close". En iOS/Android native apps y en Progressive Web Apps modernas, el patrón estándar para drawers bottom-sheet incluye un handle visual y soporte de swipe-down para cerrar.
+- **Corrección sugerida**: agregar un indicador visual de handle (`div.drawer-handle`) al top del drawer en mobile, e implementar un listener de `touchstart`/`touchmove`/`touchend` para cerrar con swipe-down.
+
+**F.3 — El `task-points-popover` puede quedar fuera del viewport en columnas extremas**
+
+- Archivo: `kanban/src/ui/task/TaskCard.jsx`, `kanban/src/ui/shared/board.css`
+- El popover se posiciona con `position: absolute; right: 0; bottom: calc(100% + 10px)`. Si la task card está en la primera columna (leftmost) y el popover es más ancho que la zona disponible a la derecha, puede salirse del viewport.
+- **Corrección sugerida**: agregar lógica de posicionamiento dinámico (calcular si hay espacio y ajustar `right`/`left`) o usar un portal para posicionar el popover fuera del contexto del card.
+
+---
+
+**Proposed acceptance criteria**
+
+- El hero del board se convierte en un header compacto sin perder las stats (A.1)
+- Los composers de creación se integran contextualmente: inline en columnas para tasks, botón `+ Add column` al final del rail para columnas (A.2)
+- Se elimina el `column-summary` con texto genérico (A.3)
+- Se agrega un hint de `⌘K` permanente y visible en el header desktop (B.1)
+- Se agrega `title` tooltip al botón `···` de acciones de columna (B.2)
+- Se mejora el icono y/o tooltip del botón "Open details" en TaskCard (B.3)
+- Se agrega texto de ayuda al input de labels en el drawer (B.4)
+- Se corrige el uso de `role="presentation"` en backdrops (C.1)
+- Los modales y el drawer manejan foco al abrirse (C.2)
+- Se alinea `aria-label` del botón de cierre del drawer con el texto visible (C.3)
+- Se eliminan `aria-label` redundantes en inputs ya envueltos por `<label>` (C.4)
+- Se elimina `|| index === 0` de la condición `is-primary` en CommandPalette (D.4)
+- El botón de confirm en el modal de clear column dice "Clear tasks" en vez de "Delete tasks" (E.1)
+- Se unifica el copy de subtítulo mobile o se elimina (E.2)
+- Se unifica el patrón de submit en composers (E.3)
+- Se limita la cantidad de labels visibles en TaskCard con overflow badge (F.1)
+
+**Notes**
+
+- A.1 y A.2 son los cambios de mayor impacto visual y funcional; requieren rediseño del layout principal y pueden coordinarse con BF-005 si el refactor de Clean Architecture sigue en progreso
+- C.2 (gestión de foco) es un cambio de accesibilidad crítico para usuarios de teclado y debería priorizarse independientemente del resto
+- D.4 (bug de `is-primary`) es un fix de una línea con impacto visual inmediato y sin riesgo
+- E.1 (copy del modal de clear) es un fix de copy de bajo riesgo
+- F.2 (swipe-down en mobile) puede implementarse de forma progresiva: primero el handle visual, luego el gesto
+- Se recomienda resolver en este orden: fixes de bajo riesgo (D.4, E.1, B.2, B.3, B.4, C.1, C.3, C.4, E.2, E.3) → accesibilidad de foco (C.2) → overflow de labels (F.1) → rediseño de layout (A.1, A.2, A.3)

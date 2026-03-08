@@ -6,6 +6,11 @@
       "sourceType": "github",
       "computedHash": "2918e7d781e467800d3a7b2f899f859f243c6582182b02419abe9f6f46200953"
     },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
     "systematic-debugging": {
       "source": "obra/superpowers",
       "sourceType": "github",

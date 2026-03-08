@@ -376,49 +376,66 @@ const BoardView = ({
                 </div>
 
                 <div className="board-toolbar">
-                    <div className="composer-card">
+                    <div className="composer-card task-composer-card">
                         <div className="composer-copy">
                             <span className="composer-label">Quick add</span>
                             <h2>Create task</h2>
                             <p>Add a new card directly into the first workflow column.</p>
                         </div>
-                        <div className="composer-form add-task">
-                            <input
-                                ref={addTaskInputRef}
-                                className="input-add"
-                                type="text"
-                                placeholder="New Task"
-                                value={newTaskInput}
-                                onChange={(event) => setNewTaskInput(event.target.value)}
-                                onKeyDown={(event) => {
-                                    if (event.key === "Enter") {
-                                        onAddTask();
-                                    }
-                                }}
-                            />
-                            <button
-                                className="action-button primary-button"
-                                disabled={!newTaskInput}
-                                onClick={onAddTask}
-                                type="button"
-                            >
-                                Create task
-                            </button>
+                        <div className="task-composer-surface">
+                            <div className="task-composer-title-row">
+                                <span
+                                    aria-hidden="true"
+                                    className="task-priority-dot task-priority-dot-medium"
+                                />
+                                <input
+                                    aria-label="Quick add task title"
+                                    ref={addTaskInputRef}
+                                    className="task-composer-input"
+                                    type="text"
+                                    placeholder="Configurar entorno de"
+                                    value={newTaskInput}
+                                    onChange={(event) => setNewTaskInput(event.target.value)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === "Enter") {
+                                            onAddTask();
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <p className="task-composer-description">
+                                Add the title now and complete details from the task drawer.
+                            </p>
+                            <div className="task-composer-divider" />
+                            <div className="task-composer-footer">
+                                <span className="task-composer-meta-pill">First lane</span>
+                                <span className="task-composer-meta-pill">Quick add</span>
+                                <button
+                                    aria-label="Create task"
+                                    className="action-button task-composer-submit"
+                                    disabled={!newTaskInput}
+                                    onClick={onAddTask}
+                                    type="button"
+                                >
+                                    Enter ↵
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="composer-card">
+                    <div className="composer-card column-composer-card">
                         <div className="composer-copy">
                             <span className="composer-label">Board structure</span>
                             <h2>Create column</h2>
                             <p>Expand your workflow with a new lane and keep the flow visible.</p>
                         </div>
-                        <div className="composer-form add-column">
+                        <div className="column-composer-input-shell">
                             <input
+                                aria-label="New column title"
                                 ref={addColumnInputRef}
                                 type="text"
-                                className="input-add"
-                                placeholder="New Column"
+                                className="column-composer-input"
+                                placeholder="ARCHIVAD"
                                 value={newColumnInput}
                                 onChange={(event) => setNewColumnInput(event.target.value)}
                                 onKeyDown={(event) => {
@@ -428,13 +445,17 @@ const BoardView = ({
                                 }}
                             />
                             <button
-                                className="action-button"
+                                aria-label="Create column"
+                                className="action-button column-composer-submit"
                                 disabled={!newColumnInput}
                                 onClick={onAddColumn}
                                 type="button"
                             >
-                                Create column
+                                Enter ↵
                             </button>
+                        </div>
+                        <div className="column-composer-preview" aria-hidden="true">
+                            <span>Cards will appear here</span>
                         </div>
                     </div>
 

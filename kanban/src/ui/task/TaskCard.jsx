@@ -212,23 +212,15 @@ const TaskCard = ({
                                         <div className="task-action-bar task-actions">
                                             <button
                                                 aria-label={`Open details for ${title}`}
-                                                className="action-button subtle-button task-action-button task-action-icon"
+                                                className="action-button primary-button task-action-button task-action-icon task-open-details-button"
                                                 onClick={() => onOpenDetails(id)}
                                                 type="button"
                                             >
                                                 <span aria-hidden="true">＋</span>
                                             </button>
                                             <button
-                                                aria-label={`Edit task ${title}`}
-                                                className="action-button subtle-button task-action-button task-action-icon"
-                                                onClick={() => setIsEditing(true)}
-                                                type="button"
-                                            >
-                                                <span aria-hidden="true">✎</span>
-                                            </button>
-                                            <button
                                                 aria-label={`Delete task ${title}`}
-                                                className="action-button danger-button task-action-button task-action-icon"
+                                                className="action-button subtle-button task-action-button task-action-icon task-delete-button"
                                                 onClick={handleDelete}
                                                 type="button"
                                             >

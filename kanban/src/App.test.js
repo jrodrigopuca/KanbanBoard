@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { vi } from "vitest";
 import App from "./App";
 import { createDefaultColumns } from "./domain/models/board";
@@ -80,16 +80,21 @@ test("opens the task detail drawer and saves task changes", async () => {
     expect(
         await screen.findByRole("dialog", { name: /hello/i }),
     ).toBeInTheDocument();
+    const taskDrawer = screen.getByRole("dialog", { name: /hello/i });
 
-    const titleInput = screen.getByRole("textbox", { name: /task title/i });
-    const descriptionInput = screen.getByRole("textbox", {
+    const titleInput = within(taskDrawer).getByRole("textbox", {
+        name: /task title/i,
+    });
+    const descriptionInput = within(taskDrawer).getByRole("textbox", {
         name: /task description/i,
     });
-    const labelsInput = screen.getByRole("textbox", { name: /task labels/i });
-    const priorityInput = screen.getByRole("combobox", {
+    const labelsInput = within(taskDrawer).getByRole("textbox", {
+        name: /task labels/i,
+    });
+    const priorityInput = within(taskDrawer).getByRole("combobox", {
         name: /task priority/i,
     });
-    const newSubtaskInput = screen.getByRole("textbox", {
+    const newSubtaskInput = within(taskDrawer).getByRole("textbox", {
         name: /new subtask/i,
     });
 
@@ -100,15 +105,19 @@ test("opens the task detail drawer and saves task changes", async () => {
     fireEvent.change(labelsInput, { target: { value: "Bug, UX" } });
     fireEvent.change(priorityInput, { target: { value: "high" } });
     fireEvent.click(
-        screen.getByRole("checkbox", {
+        within(taskDrawer).getByRole("checkbox", {
             name: /toggle subtask refine interactions/i,
         }),
     );
     fireEvent.change(newSubtaskInput, {
         target: { value: "Share implementation notes" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /create subtask/i }));
-    fireEvent.click(screen.getByRole("button", { name: /save task/i }));
+    fireEvent.click(
+        within(taskDrawer).getByRole("button", { name: /create subtask/i }),
+    );
+    fireEvent.click(
+        within(taskDrawer).getByRole("button", { name: /save task/i }),
+    );
 
     expect(
         await screen.findByDisplayValue(/updated hello/i),
@@ -120,14 +129,16 @@ test("opens the task detail drawer and saves task changes", async () => {
     ).toBeInTheDocument();
     expect(screen.getByDisplayValue(/bug, ux/i)).toBeInTheDocument();
     expect(
-        screen.getByRole("combobox", { name: /task priority/i }),
+        within(taskDrawer).getByRole("combobox", { name: /task priority/i }),
     ).toHaveValue("high");
     expect(
-        screen.getByRole("checkbox", {
+        within(taskDrawer).getByRole("checkbox", {
             name: /toggle subtask refine interactions/i,
         }),
     ).toBeChecked();
-    expect(screen.getByText(/share implementation notes/i)).toBeInTheDocument();
+    expect(
+        within(taskDrawer).getByText(/share implementation notes/i),
+    ).toBeInTheDocument();
 
     fireEvent.click(
         screen.getByRole("button", { name: /close task details/i }),
@@ -192,7 +203,13 @@ test("shows undo toast after deleting a task and restores it", async () => {
     seedStarterBoard();
     render(<App />);
 
-    fireEvent.click(screen.getByRole("button", { name: /delete task hello/i }));
+    fireEvent.click(
+        screen.getByRole("button", { name: /open details for hello/i }),
+    );
+    const taskDrawer = await screen.findByRole("dialog", { name: /hello/i });
+    fireEvent.click(
+        within(taskDrawer).getByRole("button", { name: /delete task hello/i }),
+    );
 
     expect(
         await screen.findByText(/task hello deleted\./i),
@@ -325,7 +342,9 @@ test("navigates command palette with arrow keys and enter", async () => {
     fireEvent.keyDown(searchInput, { key: "ArrowDown" });
     fireEvent.keyDown(searchInput, { key: "Enter" });
 
-    expect(screen.getByPlaceholderText(/new column/i)).toHaveFocus();
+    expect(
+        screen.getByRole("textbox", { name: /new column title/i }),
+    ).toHaveFocus();
     expect(
         screen.queryByRole("dialog", { name: /command palette/i }),
     ).not.toBeInTheDocument();

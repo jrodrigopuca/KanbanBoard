@@ -123,12 +123,12 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                         </div>
                     </div>
                     <button
-                        aria-label="Close task details"
-                        className="action-button subtle-button"
+                        aria-label="Dismiss task details"
+                        className="action-button subtle-button task-action-button"
                         onClick={onClose}
                         type="button"
                     >
-                        Close
+                        Close details
                     </button>
                 </div>
 
@@ -234,7 +234,7 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                                 onClick={handleAddSubtask}
                                 type="button"
                             >
-                                Add subtask
+                                Create subtask
                             </button>
                         </div>
 
@@ -263,7 +263,7 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                                             onClick={() => handleDeleteSubtask(subtask.id)}
                                             type="button"
                                         >
-                                            Remove
+                                            Delete subtask
                                         </button>
                                     </div>
                                 ))}
@@ -302,38 +302,46 @@ const TaskDetailDrawer = ({ task, onClose, onSaveTask, onDeleteTask }) => {
                     <div className="task-drawer-actions">
                         <button
                             aria-label={`Decrease story points for ${task.title}`}
-                            className="action-button subtle-button"
+                            className="action-button subtle-button task-action-button"
                             onClick={() => handleChangePoints("decrease")}
                             type="button"
                         >
-                            -SP
+                            Lower estimate
                         </button>
                         <button
                             aria-label={`Increase story points for ${task.title}`}
-                            className="action-button subtle-button"
+                            className="action-button subtle-button task-action-button"
                             onClick={() => handleChangePoints("increase")}
                             type="button"
                         >
-                            +SP
+                            Raise estimate
                         </button>
                     </div>
                 </div>
 
-                <div className="task-drawer-footer">
+                <div className="task-drawer-footer task-action-bar">
+                    <button
+                        aria-label="Close task details"
+                        className="action-button subtle-button task-action-button"
+                        onClick={onClose}
+                        type="button"
+                    >
+                        Close details
+                    </button>
                     <button
                         aria-label={`Delete task ${task.title}`}
-                        className="action-button danger-button"
+                        className="action-button danger-button task-action-button"
                         onClick={() => onDeleteTask(task.id)}
                         type="button"
                     >
                         Delete task
                     </button>
                     <button
-                        className="action-button primary-button"
+                        className="action-button primary-button task-action-button"
                         onClick={handleSave}
                         type="button"
                     >
-                        Save changes
+                        Save task
                     </button>
                 </div>
             </aside>

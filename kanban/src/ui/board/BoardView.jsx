@@ -402,7 +402,7 @@ const BoardView = ({
                                 onClick={onAddTask}
                                 type="button"
                             >
-                                Add task
+                                Create task
                             </button>
                         </div>
                     </div>
@@ -433,7 +433,7 @@ const BoardView = ({
                                 onClick={onAddColumn}
                                 type="button"
                             >
-                                Add column
+                                Create column
                             </button>
                         </div>
                     </div>
@@ -453,14 +453,14 @@ const BoardView = ({
                                 onClick={() => setIsCommandPaletteOpen(true)}
                                 type="button"
                             >
-                                Open palette
+                                Open commands
                             </button>
                             <button
                                 className="action-button primary-button"
                                 onClick={handleOpenExportModal}
                                 type="button"
                             >
-                                Export options
+                                Open export
                             </button>
                         </div>
                     </div>
@@ -668,7 +668,7 @@ const BoardView = ({
                                 onClick={onConfirmClearColumn}
                                 type="button"
                             >
-                                Clear tasks
+                                Delete tasks
                             </button>
                         </div>
                     </div>
@@ -697,7 +697,7 @@ const BoardView = ({
                                 onClick={closeExportModal}
                                 type="button"
                             >
-                                Close
+                                Close export
                             </button>
                         </div>
 
@@ -741,7 +741,7 @@ const BoardView = ({
                                     onClick={closeExportModal}
                                     type="button"
                                 >
-                                    Cancel
+                                    Close export
                                 </button>
                                 <button
                                     className="action-button primary-button"

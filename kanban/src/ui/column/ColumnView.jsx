@@ -88,7 +88,7 @@ const ColumnView = ({
                                 onClick={handleSaveTitle}
                                 type="button"
                             >
-                                ✅
+                                Save column
                             </button>
                             <button
                                 aria-label={`Cancel editing column ${title}`}
@@ -96,7 +96,7 @@ const ColumnView = ({
                                 onClick={handleCancelTitle}
                                 type="button"
                             >
-                                ✖
+                                Cancel edit
                             </button>
                         </div>
                     </div>

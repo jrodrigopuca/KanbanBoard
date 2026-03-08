@@ -74,7 +74,7 @@ test("opens the task detail drawer and saves task changes", async () => {
     render(<App />);
 
     fireEvent.click(
-        screen.getByRole("button", { name: /view details for hello/i }),
+        screen.getByRole("button", { name: /open details for hello/i }),
     );
 
     expect(
@@ -107,8 +107,8 @@ test("opens the task detail drawer and saves task changes", async () => {
     fireEvent.change(newSubtaskInput, {
         target: { value: "Share implementation notes" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /add subtask/i }));
-    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+    fireEvent.click(screen.getByRole("button", { name: /create subtask/i }));
+    fireEvent.click(screen.getByRole("button", { name: /save task/i }));
 
     expect(
         await screen.findByDisplayValue(/updated hello/i),
@@ -162,10 +162,10 @@ test("exports board data as json and csv", async () => {
 
     render(<App />);
 
-    fireEvent.click(screen.getByRole("button", { name: /export options/i }));
+    fireEvent.click(screen.getByRole("button", { name: /open export/i }));
     fireEvent.click(screen.getByRole("button", { name: /download json/i }));
 
-    fireEvent.click(screen.getByRole("button", { name: /export options/i }));
+    fireEvent.click(screen.getByRole("button", { name: /open export/i }));
     fireEvent.click(
         screen.getByRole("button", { name: /table format \(csv\)/i }),
     );
@@ -224,7 +224,7 @@ test("clears a column with confirmation and can undo it", async () => {
         }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /^clear tasks$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^delete tasks$/i }));
 
     expect(screen.queryByText(/^hello$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/^world$/i)).not.toBeInTheDocument();

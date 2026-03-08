@@ -80,6 +80,7 @@ const TaskCard = ({
                         provided.draggableProps.style,
                         snapshot.isDragging,
                     )}
+                    title={dateToShow}
                 >
                     {isEditing ? (
                         <div className="task-editor">
@@ -92,10 +93,21 @@ const TaskCard = ({
                                     setEditedContent(event.target.value)
                                 }
                             />
-                            <div className="task-actions task-actions-visible">
+                            <div className="task-action-bar task-actions task-actions-visible">
+                                <button
+                                    aria-label={`Cancel editing task ${title}`}
+                                    className="action-button subtle-button task-action-button"
+                                    onClick={() => {
+                                        setEditedContent(title);
+                                        setIsEditing(false);
+                                    }}
+                                    type="button"
+                                >
+                                    Cancel edit
+                                </button>
                                 <button
                                     aria-label={`Save task ${title}`}
-                                    className="action-button primary-button"
+                                    className="action-button primary-button task-action-button"
                                     onClick={() => {
                                         setIsEditing(false);
                                         onEdit(id, {
@@ -105,7 +117,7 @@ const TaskCard = ({
                                     }}
                                     type="button"
                                 >
-                                    Save
+                                    Save task
                                 </button>
                             </div>
                         </div>
@@ -128,7 +140,6 @@ const TaskCard = ({
                                 </div>
                             </div>
                             <div className="task-footer">
-                                <div className="task-date task-date-inline">{dateToShow}</div>
                                 <div className="task-bottom-row">
                                     <div className="task-meta-row">
                                         <span
@@ -193,35 +204,35 @@ const TaskCard = ({
                                             title="Story points"
                                             type="button"
                                         >
-                                            <span>{pointsToShow}</span>
                                             <span aria-hidden="true" className="task-points-caret">
                                                 ▾
                                             </span>
+                                            <span>{pointsToShow}</span>
                                         </button>
-                                        <div className="task-actions">
+                                        <div className="task-action-bar task-actions">
                                             <button
-                                                aria-label={`View details for ${title}`}
-                                                className="action-button subtle-button task-icon-button"
+                                                aria-label={`Open details for ${title}`}
+                                                className="action-button subtle-button task-action-button task-action-icon"
                                                 onClick={() => onOpenDetails(id)}
                                                 type="button"
                                             >
-                                                ↗
+                                                <span aria-hidden="true">＋</span>
                                             </button>
                                             <button
                                                 aria-label={`Edit task ${title}`}
-                                                className="action-button subtle-button task-icon-button"
+                                                className="action-button subtle-button task-action-button task-action-icon"
                                                 onClick={() => setIsEditing(true)}
                                                 type="button"
                                             >
-                                                ✎
+                                                <span aria-hidden="true">✎</span>
                                             </button>
                                             <button
                                                 aria-label={`Delete task ${title}`}
-                                                className="action-button danger-button task-icon-button"
+                                                className="action-button danger-button task-action-button task-action-icon"
                                                 onClick={handleDelete}
                                                 type="button"
                                             >
-                                                ✕
+                                                <span aria-hidden="true">✕</span>
                                             </button>
                                         </div>
                                     </div>

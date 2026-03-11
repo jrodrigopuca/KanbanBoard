@@ -17,7 +17,6 @@ const CommandPalette = ({
         <div
             className="command-palette-backdrop"
             onClick={onClose}
-            role="presentation"
         >
             <div
                 aria-labelledby="command-palette-title"
@@ -78,9 +77,7 @@ const CommandPalette = ({
                                 aria-label={`Run command ${command.label}`}
                                 aria-selected={command.id === activeCommandId}
                                 className={`command-palette-item ${
-                                    command.id === activeCommandId || index === 0
-                                        ? "is-primary"
-                                        : ""
+                                    command.id === activeCommandId ? "is-primary" : ""
                                 }`}
                                 id={command.id}
                                 key={command.id}

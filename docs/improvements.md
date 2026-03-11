@@ -599,6 +599,23 @@ Mover tareas entre columnas es la operación fundamental de un tablero Kanban. S
 - El handler reutiliza el caso de uso `moveTask` existente construyendo un `result` equivalente al de drag & drop
 - `npm run build` pasa correctamente tras la implementación
 
+**Closure review**
+
+Todos los fixes de bajo riesgo fueron completados:
+
+- **D.4** — Se eliminó `|| index === 0` de la condición `is-primary` en CommandPalette
+- **E.1** — El botón de confirmación del modal de clear column ahora dice "Clear tasks" en vez de "Delete tasks"
+- **B.2** — Se agregó `title="Column actions"` al botón `···` de acciones de columna
+- **B.3** — Se agregó `title="Open task details"` al botón de abrir detalles en TaskCard
+- **B.4** — Se agregó hint "Separate labels with commas" al input de labels en el drawer
+- **C.1** — Se eliminó `role="presentation"` de todos los backdrops (CommandPalette, BoardView modales, TaskDetailDrawer)
+- **C.3** — Se cambió `aria-label` del botón de cierre del drawer de "Dismiss task details" a "Close task details"
+- **C.4** — Se eliminaron `aria-label` redundantes en inputs del drawer (title, description, labels)
+- **E.2** — El subtítulo mobile ahora dice "Focused delivery workspace" igual que el desktop
+- **E.3** — El botón del subtask composer ahora dice "Enter ↵" igual que los otros composers
+
+El build pasa correctamente (`npm run build` OK). Los tests fallan por un tema de mock de localStorage preexistente no relacionado con estos cambios.
+
 ---
 
 ### BF-008: Segunda revisión de consistencia UI/UX
@@ -796,28 +813,38 @@ A continuación se documentan las inconsistencias detectadas, agrupadas por cate
 
 **Proposed acceptance criteria**
 
+- ✓ Se elimina el `column-summary` con texto genérico (A.3)
+- ✓ Se agrega un hint de `⌘K` permanente y visible en el header desktop (B.1)
+- ✓ Se agrega `title` tooltip al botón `···` de acciones de columna (B.2)
+- ✓ Se mejora el icono y/o tooltip del botón "Open details" en TaskCard (B.3)
+- ✓ Se agrega texto de ayuda al input de labels en el drawer (B.4)
+- ✓ Se corrige el uso de `role="presentation"` en backdrops (C.1)
+- ✓ Los modales y el drawer manejan foco al abrirse (C.2)
+- ✓ Se alinea `aria-label` del botón de cierre del drawer con el texto visible (C.3)
+- ✓ Se eliminan `aria-label` redundantes en inputs ya envueltos por `<label>` (C.4)
+- ✓ Se elimina `|| index === 0` de la condición `is-primary` en CommandPalette (D.4)
+- ✓ El botón de confirm en el modal de clear column dice "Clear tasks" en vez de "Delete tasks" (E.1)
+- ✓ Se unifica el copy de subtítulo mobile o se elimina (E.2)
+- ✓ Se unifica el patrón de submit en composers (E.3)
+- ✓ Se limita la cantidad de labels visibles en TaskCard con overflow badge (F.1)
+- ✓ Se corrige posicionamiento del popover de story points en columnas extremas (F.3)
+- Se implementa swipe-down para cerrar drawer en mobile (F.2)
+
+**Postergados (coordinar con BF-005 o diferir):**
 - El hero del board se convierte en un header compacto sin perder las stats (A.1)
 - Los composers de creación se integran contextualmente: inline en columnas para tasks, botón `+ Add column` al final del rail para columnas (A.2)
-- Se elimina el `column-summary` con texto genérico (A.3)
-- Se agrega un hint de `⌘K` permanente y visible en el header desktop (B.1)
-- Se agrega `title` tooltip al botón `···` de acciones de columna (B.2)
-- Se mejora el icono y/o tooltip del botón "Open details" en TaskCard (B.3)
-- Se agrega texto de ayuda al input de labels en el drawer (B.4)
-- Se corrige el uso de `role="presentation"` en backdrops (C.1)
-- Los modales y el drawer manejan foco al abrirse (C.2)
-- Se alinea `aria-label` del botón de cierre del drawer con el texto visible (C.3)
-- Se eliminan `aria-label` redundantes en inputs ya envueltos por `<label>` (C.4)
-- Se elimina `|| index === 0` de la condición `is-primary` en CommandPalette (D.4)
-- El botón de confirm en el modal de clear column dice "Clear tasks" en vez de "Delete tasks" (E.1)
-- Se unifica el copy de subtítulo mobile o se elimina (E.2)
-- Se unifica el patrón de submit en composers (E.3)
-- Se limita la cantidad de labels visibles en TaskCard con overflow badge (F.1)
 
 **Notes**
 
-- A.1 y A.2 son los cambios de mayor impacto visual y funcional; requieren rediseño del layout principal y pueden coordinarse con BF-005 si el refactor de Clean Architecture sigue en progreso
-- C.2 (gestión de foco) es un cambio de accesibilidad crítico para usuarios de teclado y debería priorizarse independientemente del resto
-- D.4 (bug de `is-primary`) es un fix de una línea con impacto visual inmediato y sin riesgo
-- E.1 (copy del modal de clear) es un fix de copy de bajo riesgo
-- F.2 (swipe-down en mobile) puede implementarse de forma progresiva: primero el handle visual, luego el gesto
-- Se recomienda resolver en este orden: fixes de bajo riesgo (D.4, E.1, B.2, B.3, B.4, C.1, C.3, C.4, E.2, E.3) → accesibilidad de foco (C.2) → overflow de labels (F.1) → rediseño de layout (A.1, A.2, A.3)
+- A.1 y A.2 son cambios muy grandes que deberían coordinarse con BF-005 (Clean Architecture). Recomiendo sacarlos de BF-008 y tratarlos como features independientes.
+- F.2 (swipe-down en mobile) es nice-to-have. Si hay tiempo se hace, si no se difiere.
+- F.3 es edge case muy específico (solo afecta si tenés muchas labels Y estás en primera columna).
+
+**Prioridades ajustadas:**
+
+1. ✓ C.2 — Foco en modales (completado)
+2. ✓ B.1 — Hint ⌘K visible (completado)
+3. ✓ A.3 — Eliminar column-summary (completado)
+4. ✓ F.1 — Limitar labels visibles (completado)
+5. ✓ F.3 — Popover positioning (completado)
+6. Postergar: F.2, A.1, A.2

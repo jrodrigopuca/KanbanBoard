@@ -123,6 +123,28 @@ body {
   color: var(--text-secondary);
 }
 
+.board-command-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  align-self: flex-start;
+}
+
+.board-command-hint:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+
 .board-toolbar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -583,12 +605,6 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.column-summary {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.55;
-}
-
 .task-list {
   display: flex;
   flex-direction: column;
@@ -597,6 +613,17 @@ body {
   border-radius: calc(var(--radius) - 4px);
   padding: 8px 0 0;
   transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.column-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  color: var(--text-quaternary);
+  font-size: 0.85rem;
 }
 
 .task-list.dragging-over {
@@ -767,6 +794,11 @@ body {
   box-shadow: 0 18px 28px rgba(0, 0, 0, 0.34);
 }
 
+.task-points-popover-left {
+  right: auto;
+  left: 0;
+}
+
 .task-points-popover-label {
   margin: 0;
   color: var(--text-quaternary);
@@ -863,6 +895,13 @@ body {
   color: var(--accent-blue);
   background: rgba(88, 166, 255, 0.08);
   border: 1px solid rgba(88, 166, 255, 0.16);
+}
+
+.task-label-overflow {
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: 600;
 }
 
 .task-footer {
@@ -1166,6 +1205,13 @@ button:disabled,
   gap: 8px;
   color: var(--text-muted);
   font-weight: 600;
+}
+
+.task-drawer-field-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: -4px;
 }
 
 .task-drawer-textarea {

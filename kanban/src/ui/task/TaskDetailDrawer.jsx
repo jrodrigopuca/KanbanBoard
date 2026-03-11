@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createSubtaskModel } from "../../domain/models/subtask";
 import {
     STORY_POINTS,
@@ -23,6 +23,15 @@ const TaskDetailDrawer = ({ columns, task, onClose, onSaveTask, onDeleteTask, on
     const [subtasks, setSubtasks] = useState(normalizeSubtasks(task.subtasks));
     const [points, setPoints] = useState(task.points || getDefaultStoryPoints());
     const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+    const drawerRef = useRef(null);
+    const titleInputRef = useRef(null);
+
+    // Focus management: move focus to title input when drawer opens
+    useEffect(() => {
+        if (titleInputRef.current) {
+            titleInputRef.current.focus();
+        }
+    }, []);
 
     useEffect(() => {
         setTitle(task.title);
@@ -95,7 +104,7 @@ const TaskDetailDrawer = ({ columns, task, onClose, onSaveTask, onDeleteTask, on
         <div
             className="task-drawer-backdrop"
             onClick={onClose}
-            role="presentation"
+            ref={drawerRef}
         >
             <aside
                 aria-labelledby="task-drawer-title"
@@ -116,7 +125,7 @@ const TaskDetailDrawer = ({ columns, task, onClose, onSaveTask, onDeleteTask, on
                         </div>
                     </div>
                     <button
-                        aria-label="Dismiss task details"
+                        aria-label="Close task details"
                         className="action-button subtle-button task-action-button"
                         onClick={onClose}
                         type="button"
@@ -149,9 +158,9 @@ const TaskDetailDrawer = ({ columns, task, onClose, onSaveTask, onDeleteTask, on
                     <label className="task-drawer-field">
                         <span>Task title</span>
                         <input
-                            aria-label="Task title"
                             className="input-add"
                             onChange={(event) => setTitle(event.target.value)}
+                            ref={titleInputRef}
                             type="text"
                             value={title}
                         />
@@ -160,7 +169,6 @@ const TaskDetailDrawer = ({ columns, task, onClose, onSaveTask, onDeleteTask, on
                     <label className="task-drawer-field">
                         <span>Description</span>
                         <textarea
-                            aria-label="Task description"
                             className="task-drawer-textarea"
                             onChange={(event) => setDescription(event.target.value)}
                             placeholder="Add details, notes, or context for this task"
@@ -188,13 +196,13 @@ const TaskDetailDrawer = ({ columns, task, onClose, onSaveTask, onDeleteTask, on
                         <label className="task-drawer-field">
                             <span>Labels</span>
                             <input
-                                aria-label="Task labels"
                                 className="input-add"
                                 onChange={(event) => setLabelInput(event.target.value)}
                                 placeholder="Bug, UI, Backend"
                                 type="text"
                                 value={labelInput}
                             />
+                            <small className="task-drawer-field-hint">Separate labels with commas</small>
                         </label>
                     </div>
 
@@ -238,7 +246,7 @@ const TaskDetailDrawer = ({ columns, task, onClose, onSaveTask, onDeleteTask, on
                                 onClick={handleAddSubtask}
                                 type="button"
                             >
-                                Create subtask
+                                Enter ↵
                             </button>
                         </div>
 

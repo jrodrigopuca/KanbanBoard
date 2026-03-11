@@ -47,7 +47,46 @@ const TaskCard = ({
     onOpenDetails,
 }) => {
     const [isPointsSelectorOpen, setIsPointsSelectorOpen] = useState(false);
+    const [popoverPosition, setPopoverPosition] = useState("right");
     const pointsControlRef = useRef(null);
+    const cardRef = useRef(null);
+
+    useEffect(() => {
+        if (!isPointsSelectorOpen) {
+            return;
+        }
+
+        // Calculate if there's enough space on the right side of the card
+        const calculatePosition = () => {
+            if (!cardRef.current || !pointsControlRef.current) {
+                return;
+            }
+
+            const cardRect = cardRef.current.getBoundingClientRect();
+            const controlRect = pointsControlRef.current.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const popoverWidth = 220; // min-width from CSS
+
+            // Check if there's enough space on the right
+            const spaceOnRight = viewportWidth - controlRect.right;
+            const spaceOnLeft = controlRect.left;
+
+            if (spaceOnRight < popoverWidth && spaceOnLeft > popoverWidth) {
+                setPopoverPosition("left");
+            } else {
+                setPopoverPosition("right");
+            }
+        };
+
+        calculatePosition();
+
+        const handleResize = () => {
+            calculatePosition();
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [isPointsSelectorOpen]);
 
     useEffect(() => {
         if (!isPointsSelectorOpen) {
@@ -98,7 +137,10 @@ const TaskCard = ({
                     className={`task ${snapshot.isDragging ? "dragging" : ""}`}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    ref={provided.innerRef}
+                    ref={(node) => {
+                        provided.innerRef(node);
+                        cardRef.current = node;
+                    }}
                     style={getTaskCardStyle(
                         provided.draggableProps.style,
                         snapshot.isDragging,
@@ -131,11 +173,16 @@ const TaskCard = ({
                                 </span>
                                 {taskLabels.length > 0 && (
                                     <div className="task-label-list">
-                                        {taskLabels.map((label) => (
+                                        {taskLabels.slice(0, 3).map((label) => (
                                             <span className="task-label-chip" key={label}>
                                                 {label}
                                             </span>
                                         ))}
+                                        {taskLabels.length > 3 && (
+                                            <span className="task-label-chip task-label-overflow">
+                                                +{taskLabels.length - 3}
+                                            </span>
+                                        )}
                                     </div>
                                 )}
                                 {subtaskProgress.total > 0 && (
@@ -151,7 +198,10 @@ const TaskCard = ({
                                 ref={pointsControlRef}
                             >
                                 {isPointsSelectorOpen && (
-                                    <div className="task-points-popover" role="dialog">
+                                    <div
+                                        className={`task-points-popover task-points-popover-${popoverPosition}`}
+                                        role="dialog"
+                                    >
                                         <p className="task-points-popover-label">
                                             Estimate (points)
                                         </p>
@@ -199,6 +249,7 @@ const TaskCard = ({
                                         aria-label={`Open details for ${title}`}
                                         className="action-button primary-button task-action-button task-action-icon task-open-details-button"
                                         onClick={() => onOpenDetails(id)}
+                                        title="Open task details"
                                         type="button"
                                     >
                                         <span aria-hidden="true">→</span>

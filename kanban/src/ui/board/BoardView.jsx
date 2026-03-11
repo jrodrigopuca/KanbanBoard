@@ -61,6 +61,10 @@ const BoardView = ({
     );
     const addTaskInputRef = useRef(null);
     const addColumnInputRef = useRef(null);
+    const deleteModalRef = useRef(null);
+    const clearModalRef = useRef(null);
+    const deleteModalConfirmRef = useRef(null);
+    const clearModalConfirmRef = useRef(null);
     const totalTasks = columns.reduce(
         (taskCount, column) => taskCount + column.tasks.length,
         0,
@@ -238,6 +242,20 @@ const BoardView = ({
         });
     }, [columns]);
 
+    // Focus management for delete column modal
+    useEffect(() => {
+        if (columnPendingDelete && deleteModalConfirmRef.current) {
+            deleteModalConfirmRef.current.focus();
+        }
+    }, [columnPendingDelete]);
+
+    // Focus management for clear column modal
+    useEffect(() => {
+        if (columnPendingClear && clearModalConfirmRef.current) {
+            clearModalConfirmRef.current.focus();
+        }
+    }, [columnPendingClear]);
+
     const filteredCommands = useMemo(() => {
         const nextQuery = commandQuery.trim().toLowerCase();
 
@@ -330,7 +348,7 @@ const BoardView = ({
                     <div className="mobile-board-header">
                         <div className="mobile-header-brand">
                             <span className="mobile-header-title">Kanban Board</span>
-                            <span className="mobile-header-caption">Focused delivery</span>
+                            <span className="mobile-header-caption">Focused delivery workspace</span>
                         </div>
                         <button
                             aria-label="Open quick actions"
@@ -367,6 +385,16 @@ const BoardView = ({
                             <strong className="board-stat-value">{populatedColumns}</strong>
                         </div>
                     </div>
+
+                    <button
+                        aria-label="Open command palette"
+                        className="board-command-hint"
+                        onClick={() => setIsCommandPaletteOpen(true)}
+                        title="Open command palette (Cmd+K)"
+                        type="button"
+                    >
+                        <span aria-hidden="true">⌘K</span>
+                    </button>
                 </div>
 
                 <div className="board-toolbar">
@@ -625,7 +653,7 @@ const BoardView = ({
                 <div
                     className="modal-overlay"
                     onClick={onCloseDeleteModal}
-                    role="presentation"
+                    ref={deleteModalRef}
                 >
                     <div
                         aria-labelledby="delete-column-title"
@@ -652,6 +680,7 @@ const BoardView = ({
                             <button
                                 className="action-button danger-button"
                                 onClick={onConfirmDeleteColumn}
+                                ref={deleteModalConfirmRef}
                                 type="button"
                             >
                                 Delete column
@@ -665,7 +694,7 @@ const BoardView = ({
                 <div
                     className="modal-overlay"
                     onClick={onCloseClearModal}
-                    role="presentation"
+                    ref={clearModalRef}
                 >
                     <div
                         aria-labelledby="clear-column-title"
@@ -692,9 +721,10 @@ const BoardView = ({
                             <button
                                 className="action-button danger-button"
                                 onClick={onConfirmClearColumn}
+                                ref={clearModalConfirmRef}
                                 type="button"
                             >
-                                Delete tasks
+                                Clear tasks
                             </button>
                         </div>
                     </div>
@@ -705,7 +735,6 @@ const BoardView = ({
                 <div
                     className="modal-overlay"
                     onClick={closeExportModal}
-                    role="presentation"
                 >
                     <div
                         aria-labelledby="export-board-title"

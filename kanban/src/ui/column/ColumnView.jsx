@@ -141,6 +141,7 @@ const ColumnView = ({
                                     onClick={() =>
                                         setIsActionsMenuOpen((currentValue) => !currentValue)
                                     }
+                                    title="Column actions"
                                     type="button"
                                 >
                                     ···
@@ -183,11 +184,6 @@ const ColumnView = ({
                                 )}
                             </div>
                         </div>
-                        <p className="column-summary">
-                            {tasks.length > 0
-                                ? "Keep cards moving across the workflow."
-                                : "No cards yet. Add one to get this lane started."}
-                        </p>
                     </>
                 )}
             </div>
@@ -214,6 +210,11 @@ const ColumnView = ({
                             />
                         ))}
                         {provided.placeholder}
+                        {!tasks?.length && (
+                            <div className="column-empty-state">
+                                <p>No cards yet</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </Droppable>

@@ -26,12 +26,50 @@ const TaskDetailDrawer = ({ columns, task, onClose, onSaveTask, onDeleteTask, on
     const drawerRef = useRef(null);
     const titleInputRef = useRef(null);
 
+    // Touch gesture state for mobile swipe-to-close
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchDelta, setTouchDelta] = useState(0);
+
     // Focus management: move focus to title input when drawer opens
     useEffect(() => {
         if (titleInputRef.current) {
             titleInputRef.current.focus();
         }
     }, []);
+
+    // Touch handlers for swipe-to-close on mobile
+    const handleTouchStart = (event) => {
+        const touch = event.touches[0];
+        setTouchStart(touch.clientY);
+    };
+
+    const handleTouchMove = (event) => {
+        if (touchStart === null) {
+            return;
+        }
+
+        const touch = event.touches[0];
+        const delta = touch.clientY - touchStart;
+
+        // Only allow downward swipe (positive delta)
+        if (delta > 0) {
+            setTouchDelta(delta);
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (touchStart === null) {
+            return;
+        }
+
+        // Close if swiped more than 100px downward
+        if (touchDelta > 100) {
+            onClose();
+        }
+
+        setTouchStart(null);
+        setTouchDelta(0);
+    };
 
     useEffect(() => {
         setTitle(task.title);
@@ -111,8 +149,13 @@ const TaskDetailDrawer = ({ columns, task, onClose, onSaveTask, onDeleteTask, on
                 aria-modal="true"
                 className="task-drawer"
                 onClick={(event) => event.stopPropagation()}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 role="dialog"
+                style={touchDelta > 0 ? { transform: `translateY(${touchDelta}px)`, opacity: 1 - touchDelta / 200 } : undefined}
             >
+                <div className="task-drawer-handle" aria-hidden="true" />
                 <div className="task-drawer-header">
                     <div className="task-drawer-summary">
                         <p className="board-eyebrow">Task details</p>

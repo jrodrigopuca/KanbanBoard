@@ -9,6 +9,8 @@ const ColumnView = ({
     tasks,
     className = "",
     adjacentColumns = { prev: null, next: null },
+    isFirstColumn = false,
+    onQuickAddTask,
     onUpdateTask,
     onDeleteTask,
     onMoveTaskToColumn,
@@ -214,6 +216,15 @@ const ColumnView = ({
                             <div className="column-empty-state">
                                 <p>No cards yet</p>
                             </div>
+                        )}
+                        {isFirstColumn && onQuickAddTask && (
+                            <button
+                                className="inline-add-button"
+                                onClick={onQuickAddTask}
+                                type="button"
+                            >
+                                <span aria-hidden="true">+</span> Add card
+                            </button>
                         )}
                     </div>
                 )}

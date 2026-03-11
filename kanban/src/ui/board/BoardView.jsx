@@ -631,16 +631,27 @@ const BoardView = ({
                                                             : "mobile-column-hidden"
                                                         : ""
                                                 }
+                                                isFirstColumn={columnIndex === 0}
                                                 key={column.id}
                                                 onClearColumn={onRequestClearColumn}
                                                 onDeleteColumn={onRequestDeleteColumn}
                                                 onMoveTaskToColumn={onMoveTaskToColumn}
+                                                onQuickAddTask={focusTaskComposer}
                                                 onRenameColumn={onRenameColumn}
                                                 onOpenTaskDetails={onOpenTaskDetails}
                                                 onUpdateTask={onUpdateTask}
                                                 onDeleteTask={onDeleteTask}
                                             />
                                         ))}
+                                        {!isMobileLayout && (
+                                            <button
+                                                className="inline-add-column-button"
+                                                onClick={focusColumnComposer}
+                                                type="button"
+                                            >
+                                                <span aria-hidden="true">+</span> Add column
+                                            </button>
+                                        )}
                                     </div>
                                 </>
                             )}

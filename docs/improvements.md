@@ -828,17 +828,17 @@ A continuación se documentan las inconsistencias detectadas, agrupadas por cate
 - ✓ Se unifica el patrón de submit en composers (E.3)
 - ✓ Se limita la cantidad de labels visibles en TaskCard con overflow badge (F.1)
 - ✓ Se corrige posicionamiento del popover de story points en columnas extremas (F.3)
-- Se implementa swipe-down para cerrar drawer en mobile (F.2)
+- ✓ Se implementa swipe-down para cerrar drawer en mobile (F.2)
+- ✓ Los composers de creación se integran contextualmente: inline en columnas para tasks, botón `+ Add column` al final del rail para columnas (A.2)
 
 **Postergados (coordinar con BF-005 o diferir):**
 - El hero del board se convierte en un header compacto sin perder las stats (A.1)
-- Los composers de creación se integran contextualmente: inline en columnas para tasks, botón `+ Add column` al final del rail para columnas (A.2)
 
 **Notes**
 
-- A.1 y A.2 son cambios muy grandes que deberían coordinarse con BF-005 (Clean Architecture). Recomiendo sacarlos de BF-008 y tratarlos como features independientes.
+- A.1 es un cambio grande que debería coordinarse con BF-005 (Clean Architecture). A.2 ya fue implementado.
 - F.2 (swipe-down en mobile) es nice-to-have. Si hay tiempo se hace, si no se difiere.
-- F.3 es edge case muy específico (solo afecta si tenés muchas labels Y estás en primera columna).
+- F.3 es edge case muy específico (solo afecta si hay muchas labels Y estás en primera columna).
 
 **Prioridades ajustadas:**
 
@@ -847,4 +847,6 @@ A continuación se documentan las inconsistencias detectadas, agrupadas por cate
 3. ✓ A.3 — Eliminar column-summary (completado)
 4. ✓ F.1 — Limitar labels visibles (completado)
 5. ✓ F.3 — Popover positioning (completado)
-6. Postergar: F.2, A.1, A.2
+6. ✓ F.2 — Swipe-down en drawer mobile (completado)
+7. ✓ A.2 — Composers inline (completado)
+8. **A.1** — Hero compacto (grande, coordinar con BF-005)
